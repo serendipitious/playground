@@ -75,7 +75,9 @@ bool DxWrapper::initializeDirect3d11App(HWND outputWindow, int width, int height
 
 	d3d11Device->CreateTexture2D(&depthStencilDesc, NULL, &depthStencilBuffer);
 	d3d11Device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
+	d3d11DevCon->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 
+	initBlendEquation();
 	return true;
 }
 
@@ -203,28 +205,75 @@ void DxWrapper::initWVP(int width, int height){
 	d3d11Device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
 }
 
+void DxWrapper::initBlendEquation() {
+	D3D11_BLEND_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+
+	D3D11_RENDER_TARGET_BLEND_DESC targetDesc;
+	ZeroMemory(&targetDesc, sizeof(targetDesc));
+	targetDesc.BlendEnable = true;
+	targetDesc.SrcBlend = D3D11_BLEND_SRC_COLOR;
+	targetDesc.DestBlend = D3D11_BLEND_DEST_COLOR;
+	targetDesc.BlendOp = D3D11_BLEND_OP_ADD;
+	targetDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+	targetDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
+	targetDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	targetDesc.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+	desc.AlphaToCoverageEnable = false;
+	desc.RenderTarget[0] = targetDesc;
+
+	d3d11Device->CreateBlendState(&desc, &transparency);
+
+
+	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
+
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+	rasterizerDesc.FrontCounterClockwise = true;
+	d3d11Device->CreateRasterizerState(&rasterizerDesc, &counterClockwiseCullMode);
+
+	rasterizerDesc.FrontCounterClockwise = false;
+	d3d11Device->CreateRasterizerState(&rasterizerDesc, &clockwiseCullMode);
+}
+
+
 void DxWrapper::drawScene() {
 	D3DXCOLOR bgColor(0.1f, 0.1f, 0.3f, 0.0f);
 	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// set camera
-	/*
-	XMVECTOR  camPosition = XMVectorSet(0.0f, 3.0f, -8.0f, 0.0f);
-	XMVECTOR  camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR  camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	// blend
+	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
+	d3d11DevCon->OMSetBlendState(0, 0, 0xffffffff);
+	d3d11DevCon->OMSetBlendState(transparency, blendFactor, 0xffffffff);
 
-	XMMATRIX camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
-	*/
+
 	XMFLOAT4X4 view = camera->getViewMatrix();
 	XMMATRIX camView = XMLoadFloat4x4(&view);
 	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
-	XMMATRIX world = XMMatrixIdentity();
+	XMMATRIX world = XMMatrixTranslation(0, 0, 5);
 
 	cbPerObj.WVP = XMMatrixTranspose(world * camView * camProjection);
 	d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
 	d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
+	d3d11DevCon->RSSetState(clockwiseCullMode);
+	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
+	d3d11DevCon->RSSetState(counterClockwiseCullMode);
+	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
+
+
+	world = XMMatrixTranslation(0, 1, 3);
+
+	cbPerObj.WVP = XMMatrixTranspose(world * camView * camProjection);
+	d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+	d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+	d3d11DevCon->RSSetState(clockwiseCullMode);
+	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
+	d3d11DevCon->RSSetState(counterClockwiseCullMode);
 	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
 
 	//Present the backbuffer to the screen
@@ -245,6 +294,9 @@ bool DxWrapper::releaseDirect3d11App() {
 	releaseIfNotNull(depthStencilView);
 	releaseIfNotNull(depthStencilBuffer);
 	releaseIfNotNull(cbPerObjectBuffer);
+	releaseIfNotNull(transparency);
+	releaseIfNotNull(counterClockwiseCullMode);
+	releaseIfNotNull(clockwiseCullMode);
 	return true;
 }
 

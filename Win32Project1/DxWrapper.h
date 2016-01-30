@@ -64,6 +64,12 @@ private:
 
 	cbPerObject cbPerObj;
 
+	// blend
+	ID3D11BlendState *transparency;
+	ID3D11RasterizerState *counterClockwiseCullMode;
+	ID3D11RasterizerState *clockwiseCullMode;
+
+
 	int width;
 	int height;
 
@@ -75,6 +81,7 @@ private:
 	void initModel();
 	void initTexture();
 	void initCamera();
+	void initBlendEquation();
 
 	void initScene(int widht, int height);
 	void initWVP(int width, int height);
