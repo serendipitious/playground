@@ -3,6 +3,7 @@
 D3D11_INPUT_ELEMENT_DESC inputLayout[] = {
 	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
 };
 
 UINT inputElementNum = ARRAYSIZE(inputLayout);
@@ -117,6 +118,23 @@ void DxWrapper::initScene(int width, int height) {
 	initWVP(width, height);
 	initTexture();
 	initCamera();
+	initLight();
+}
+
+void DxWrapper::initLight() {
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(D3D11_BUFFER_DESC));
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(cbPerFrame);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	HRESULT result = d3d11Device->CreateBuffer(&desc, NULL, &cbPerFrameBuffer);
+	validateResult(result, "create per frame buffer failed");
+	cbPerFra.light.ambient = XMFLOAT4(0.1, 0.1, 0.1, 0.0);
+	cbPerFra.light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
+	cbPerFra.light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
 }
 
 void DxWrapper::initCamera() {
@@ -143,10 +161,41 @@ void DxWrapper::loadShaders() {
 
 void DxWrapper::initModel() {
 	Vertex v[] = {
-		Vertex(-1.0, -1.0, -1.0, 0.0, 1.0),
-		Vertex(-1.0, 1.0, -1.0, 0.0, 0.0),
-		Vertex(1.0, -1.0, -1.0, 1.0, 1.0),
-		Vertex(1.0, 1.0, -1.0, 1.0, 0.0),
+			// Front Face
+			Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, -1.0f),
+			Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, -1.0f),
+			Vertex(1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f),
+			Vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f),
+
+			// Back Face
+			Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f),
+			Vertex(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f),
+			Vertex(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f),
+			Vertex(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f),
+
+			// Top Face
+			Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, -1.0f),
+			Vertex(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f),
+			Vertex(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f),
+			Vertex(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f),
+
+			// Bottom Face
+			Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f),
+			Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f),
+			Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f),
+			Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f),
+
+			// Left Face
+			Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f),
+			Vertex(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f),
+			Vertex(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, -1.0f),
+			Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f),
+
+			// Right Face
+			Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f),
+			Vertex(1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f),
+			Vertex(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f),
+			Vertex(1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f),
 	};
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -168,8 +217,29 @@ void DxWrapper::initModel() {
 	d3d11DevCon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	DWORD idx[] = {
-		0, 1, 3,
-		0, 3, 2
+		// Front Face
+		0, 1, 2,
+		0, 2, 3,
+
+		// Back Face
+		4, 5, 6,
+		4, 6, 7,
+
+		// Top Face
+		8, 9, 10,
+		8, 10, 11,
+
+		// Bottom Face
+		12, 13, 14,
+		12, 14, 15,
+
+		// Left Face
+		16, 17, 18,
+		16, 18, 19,
+
+		// Right Face
+		20, 21, 22,
+		20, 22, 23
 	};
 	indexSize = sizeof(idx) / sizeof(idx[0]);
 	D3D11_BUFFER_DESC indexBufferDesc;
@@ -244,6 +314,10 @@ void DxWrapper::drawScene() {
 	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+	// light
+	d3d11DevCon->UpdateSubresource(cbPerFrameBuffer, 0, NULL, &cbPerFra, 0, 0);
+	d3d11DevCon->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
+
 	// blend
 	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
 	d3d11DevCon->OMSetBlendState(0, 0, 0xffffffff);
@@ -254,8 +328,10 @@ void DxWrapper::drawScene() {
 	XMMATRIX camView = XMLoadFloat4x4(&view);
 	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
 	XMMATRIX world = XMMatrixTranslation(0, 0, 5);
+	XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
 
-	cbPerObj.WVP = XMMatrixTranspose(world * camView * camProjection);
+	cbPerObj.WVP = WVP;
+	cbPerObj.normalTransform = XMMatrixTranspose(WVP);
 	d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
 	d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
