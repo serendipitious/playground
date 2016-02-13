@@ -19,17 +19,13 @@ public:
 	void moveBackward();
 
 private:
+	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4 position;
 	XMFLOAT4 target;
 	XMFLOAT4 up;
-	float theta;
-	float alpha;
 	float angleStep;
-	float positionStep;
-	float positionOffset;
+	float offsetStep;
 
-	void rotateHorizontally(float step);
-	void rotateVertically(float step);
-	void move(float step);
+	void updateView(float pitch, float yaw, float offset);
 };
 

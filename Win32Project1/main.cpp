@@ -115,12 +115,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			dxWrapper->rotateRight();
 			break;
 		case VK_UP:
-			dxWrapper->moveForward();
-		//	dxWrapper->rotateUp();
+			dxWrapper->rotateUp();
 			break;
 		case VK_DOWN:
+			dxWrapper->rotateDown();
+			break;
+		case VK_SHIFT:
 			dxWrapper->moveBackward();
-			//dxWrapper->rotateDown();
+			break;
+		case VK_SPACE:
+			dxWrapper->moveForward();
 			break;
 		}
 		return 0;

@@ -132,7 +132,7 @@ void DxWrapper::initLight() {
 
 	HRESULT result = d3d11Device->CreateBuffer(&desc, NULL, &cbPerFrameBuffer);
 	validateResult(result, "create per frame buffer failed");
-	cbPerFra.light.ambient = XMFLOAT4(0.1, 0.1, 0.1, 0.0);
+	cbPerFra.light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
 	cbPerFra.light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
 	cbPerFra.light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
 }
