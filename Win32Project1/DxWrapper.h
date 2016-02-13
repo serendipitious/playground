@@ -5,15 +5,9 @@
 #include <d3dx10.h>
 #include <xnamath.h>
 #include "Camera.h"
-
-struct Vertex {
-	XMFLOAT3 pos;
-	XMFLOAT2 texcoord;
-	XMFLOAT3 normal;
-	Vertex(){}
-	Vertex(float x, float y, float z, float u, float v, float nx, float ny, float nz)
-		: pos(x, y, z), texcoord(u, v), normal(nx, ny, nz) {}
-};
+#include "Model.h"
+#include "Pass.h"
+#include "global.h"
 
 struct cbPerObject {
 	XMMATRIX WVP;
@@ -56,6 +50,8 @@ private:
 	ID3D11DeviceContext* d3d11DevCon;
 	ID3D11RenderTargetView* renderTargetView;
 
+	Pass *pass;
+
 	// shaders
 	ID3D11VertexShader* vs;
 	ID3D11PixelShader* ps;
@@ -67,8 +63,6 @@ private:
 	ID3D11Texture2D* depthStencilBuffer;
 
 	// geometric buffers
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* cbPerObjectBuffer;
 	ID3D11Buffer* cbPerFrameBuffer;
 
@@ -100,7 +94,5 @@ private:
 	void initScene(int widht, int height);
 	void initWVP(int width, int height);
 	void initLight();
-
-	void validateResult(HRESULT result, char* errorMessage);
 };
 
