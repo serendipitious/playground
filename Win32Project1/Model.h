@@ -1,8 +1,5 @@
 #pragma once
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
-#include <xnamath.h>
+#include "global.h"
 
 struct Vertex {
 	XMFLOAT3 pos;
@@ -18,11 +15,23 @@ class Model {
 public:
 	Model(Vertex* data, int dataSize, DWORD* indices, int indexSize);
 	~Model();
+	void IASetModel(ID3D11Device *device, ID3D11DeviceContext *context);
 
 	Vertex* data;
 	int dataSize;
 	DWORD* indices;
 	int indexSize;
 
+	// shader buffers
+	// TODO move to private
+	ID3D11VertexShader* vs;
+	ID3D11PixelShader* ps;
+	ID3D10Blob* vsBuffer;
+	ID3D10Blob* psBuffer;
+	ID3D11InputLayout* layout;
+
+	// model buffers
+	ID3D11Buffer* vertexBuffer;
+	ID3D11Buffer* indexBuffer;
 };
 

@@ -229,7 +229,7 @@ void DxWrapper::initModel() {
 	pass->model = new Model(v, ARRAYSIZE(v), idx, ARRAYSIZE(idx));
 
 	// TODO set shaders in pass's own method
-	pass->vsBuffer = vsBuffer;
+	pass->model->vsBuffer = vsBuffer;
 	pass->IASetModel();
 }
 
