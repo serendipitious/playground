@@ -6,18 +6,20 @@
 #include <xnamath.h>
 #include "Model.h"
 #include "global.h"
+#include "Camera.h"
 
 class Pass {
 public:
-	Pass(ID3D11Device *device, ID3D11DeviceContext *context);
+	Pass(ID3D11Device *device, ID3D11DeviceContext *context, Camera *camera);
 	~Pass();
 
 	Model *model;
+	void draw();
 	void IASetModel();
 
 private:
 	ID3D11Device* device;
 	ID3D11DeviceContext* context;
-
+	Camera *camera;
 };
 

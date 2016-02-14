@@ -8,6 +8,7 @@
 #include "Model.h"
 #include "Pass.h"
 #include "global.h"
+#include "Shader.h"
 
 struct cbPerObject {
 	XMMATRIX WVP;
@@ -50,14 +51,11 @@ private:
 	ID3D11DeviceContext* d3d11DevCon;
 	ID3D11RenderTargetView* renderTargetView;
 
+	// new version classes
 	Pass *pass;
+	Shader *vertexShader;
+	Shader *pixelShader;
 
-	// shaders
-	ID3D11VertexShader* vs;
-	ID3D11PixelShader* ps;
-	ID3D10Blob* vsBuffer;
-	ID3D10Blob* psBuffer;
-	ID3D11InputLayout* layout;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;

@@ -11,7 +11,8 @@ UINT inputElementNum = ARRAYSIZE(inputLayout);
 DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), height(height) {
 	initializeDirect3d11App(outputWindow, width, height);
 
-	pass = new Pass(d3d11Device, d3d11DevCon);
+	initCamera();
+	pass = new Pass(d3d11Device, d3d11DevCon, camera);
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -119,7 +120,6 @@ void DxWrapper::initScene(int width, int height) {
 	initModel();
 	initWVP(width, height);
 	initTexture();
-	initCamera();
 	initLight();
 }
 
@@ -144,21 +144,10 @@ void DxWrapper::initCamera() {
 }
 
 void DxWrapper::loadShaders() {
-	HRESULT result;
-	result = D3DX11CompileFromFile("VertexShader.hlsl", 0, 0, "main", "vs_4_0", 0, 0, 0, &vsBuffer, 0, 0);
-	validateResult(result, "exception happens when load vertex shader");
-
-	result = D3DX11CompileFromFile("PixelShader.hlsl", 0, 0, "main", "ps_4_0", 0, 0, 0, &psBuffer, 0, 0);
-	validateResult(result, "exception happens when load pixel shader");
-
-	result = d3d11Device->CreateVertexShader(vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), NULL, &vs);
-	validateResult(result, "exception when create vs");
-
-	result = d3d11Device->CreatePixelShader(psBuffer->GetBufferPointer(), psBuffer->GetBufferSize(), NULL, &ps);
-	validateResult(result, "exception when create ps");
-
-	d3d11DevCon->VSSetShader(vs, 0, 0);
-	d3d11DevCon->PSSetShader(ps, 0, 0);
+	vertexShader = new Shader("VertexShader.hlsl", VERTEX_SHADER);
+	pixelShader = new Shader("PixelShader.hlsl", PIXEL_SHADER);
+	vertexShader->setShader(d3d11Device, d3d11DevCon);
+	pixelShader->setShader(d3d11Device, d3d11DevCon);
 }
 
 void DxWrapper::initModel() {
@@ -229,7 +218,7 @@ void DxWrapper::initModel() {
 	pass->model = new Model(v, ARRAYSIZE(v), idx, ARRAYSIZE(idx));
 
 	// TODO set shaders in pass's own method
-	pass->model->vsBuffer = vsBuffer;
+	pass->model->vsBuffer = vertexShader->buffer;
 	pass->IASetModel();
 }
 
@@ -265,7 +254,6 @@ void DxWrapper::initBlendEquation() {
 
 	d3d11Device->CreateBlendState(&desc, &transparency);
 
-
 	D3D11_RASTERIZER_DESC rasterizerDesc;
 	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
 
@@ -293,7 +281,7 @@ void DxWrapper::drawScene() {
 	d3d11DevCon->OMSetBlendState(0, 0, 0xffffffff);
 	d3d11DevCon->OMSetBlendState(transparency, blendFactor, 0xffffffff);
 
-
+	
 	XMFLOAT4X4 view = camera->getViewMatrix();
 	XMMATRIX camView = XMLoadFloat4x4(&view);
 	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
@@ -311,19 +299,7 @@ void DxWrapper::drawScene() {
 	d3d11DevCon->RSSetState(counterClockwiseCullMode);
 	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
 
-
-	world = XMMatrixTranslation(0, 1, 3);
-
-	cbPerObj.WVP = XMMatrixTranspose(world * camView * camProjection);
-	d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-	d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
-	d3d11DevCon->RSSetState(clockwiseCullMode);
-	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
-	d3d11DevCon->RSSetState(counterClockwiseCullMode);
-	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
-
-	//Present the backbuffer to the screen
+//Present the backbuffer to the screen
 	swapChain->Present(0, 0);
 }
 
@@ -331,11 +307,6 @@ bool DxWrapper::releaseDirect3d11App() {
 	releaseIfNotNull(swapChain);
 	releaseIfNotNull(d3d11DevCon);
 	releaseIfNotNull(d3d11Device);
-	releaseIfNotNull(vs);
-	releaseIfNotNull(ps);
-	releaseIfNotNull(vsBuffer);
-	releaseIfNotNull(psBuffer);
-	releaseIfNotNull(layout);
 	releaseIfNotNull(depthStencilView);
 	releaseIfNotNull(depthStencilBuffer);
 	releaseIfNotNull(cbPerObjectBuffer);
