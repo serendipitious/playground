@@ -1,13 +1,5 @@
 #include "DxWrapper.h"
 
-D3D11_INPUT_ELEMENT_DESC inputLayout[] = {
-	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
-};
-
-UINT inputElementNum = ARRAYSIZE(inputLayout);
-
 DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), height(height) {
 	initializeDirect3d11App(outputWindow, width, height);
 

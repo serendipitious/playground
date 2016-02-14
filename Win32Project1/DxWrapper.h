@@ -5,7 +5,6 @@
 #include <d3dx10.h>
 #include <xnamath.h>
 #include "Camera.h"
-#include "Model.h"
 #include "Pass.h"
 #include "global.h"
 

@@ -84,14 +84,12 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DxWrapper.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Pass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DxWrapper.h" />
     <ClInclude Include="global.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="Pass.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
