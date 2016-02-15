@@ -9,6 +9,7 @@
 #include "Pass.h"
 #include "global.h"
 #include "Shader.h"
+#include "Constant.h"
 
 struct cbPerObject {
 	XMMATRIX WVP;
@@ -90,7 +91,6 @@ private:
 	void initBlendEquation();
 
 	void initScene(int widht, int height);
-	void initWVP(int width, int height);
 	void initLight();
 };
 

@@ -86,6 +86,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Pass.cpp" />
+    <ClCompile Include="Constant.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +95,7 @@
     <ClInclude Include="global.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Pass.h" />
+    <ClInclude Include="Constant.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>

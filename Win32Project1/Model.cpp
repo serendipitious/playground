@@ -15,6 +15,8 @@ Model::Model(Vertex* data, int dataSize, DWORD* indices, int indexSize)
 Model::~Model() {
 	delete data;
 	delete indices;
+	releaseIfNotNull(vertexBuffer);
+	releaseIfNotNull(indexBuffer);
 }
 
 void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context) {

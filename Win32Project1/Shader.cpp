@@ -16,8 +16,7 @@ void Shader::setShader(ID3D11Device *device, ID3D11DeviceContext *context) {
 		result = device->CreateVertexShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), NULL, &vs);
 		validateResult(result, "exception when create vs");
 		context->VSSetShader(vs, 0, 0);
-	}
-	else {
+	} else {
 		result = D3DX11CompileFromFile("PixelShader.hlsl", 0, 0, "main", "ps_4_0", 0, 0, 0, &buffer, 0, 0);
 		validateResult(result, "exception happens when load pixel shader");
 

@@ -105,12 +105,6 @@ void DxWrapper::initTexture() {
 }
 
 
-void releaseIfNotNull(IUnknown *obj) {
-	if (obj) {
-		obj->Release();
-	}
-}
-
 void DxWrapper::updateScene() {
 	
 }
@@ -118,22 +112,11 @@ void DxWrapper::updateScene() {
 void DxWrapper::initScene(int width, int height) {
 	loadShaders();
 	initModel();
-	initWVP(width, height);
 	initTexture();
 	initLight();
 }
 
 void DxWrapper::initLight() {
-	D3D11_BUFFER_DESC desc;
-	ZeroMemory(&desc, sizeof(D3D11_BUFFER_DESC));
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.ByteWidth = sizeof(cbPerFrame);
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-
-	HRESULT result = d3d11Device->CreateBuffer(&desc, NULL, &cbPerFrameBuffer);
-	validateResult(result, "create per frame buffer failed");
 	cbPerFra.light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
 	cbPerFra.light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
 	cbPerFra.light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
@@ -222,18 +205,6 @@ void DxWrapper::initModel() {
 	pass->IASetModel();
 }
 
-void DxWrapper::initWVP(int width, int height){
-	D3D11_BUFFER_DESC cbbd;
-	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
-	cbbd.Usage = D3D11_USAGE_DEFAULT;
-	cbbd.ByteWidth = sizeof(cbPerObject);
-	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbbd.CPUAccessFlags = 0;
-	cbbd.MiscFlags = 0;
-
-	d3d11Device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
-}
-
 void DxWrapper::initBlendEquation() {
 	D3D11_BLEND_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -273,15 +244,14 @@ void DxWrapper::drawScene() {
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// light
-	d3d11DevCon->UpdateSubresource(cbPerFrameBuffer, 0, NULL, &cbPerFra, 0, 0);
-	d3d11DevCon->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
+	Constant* light = new Constant(&cbPerFra, sizeof(cbPerFra), 0);
+	light->setConstantForPS(d3d11Device, d3d11DevCon);
 
 	// blend
 	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
 	d3d11DevCon->OMSetBlendState(0, 0, 0xffffffff);
 	d3d11DevCon->OMSetBlendState(transparency, blendFactor, 0xffffffff);
 
-	
 	XMFLOAT4X4 view = camera->getViewMatrix();
 	XMMATRIX camView = XMLoadFloat4x4(&view);
 	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
@@ -290,8 +260,8 @@ void DxWrapper::drawScene() {
 
 	cbPerObj.WVP = WVP;
 	cbPerObj.normalTransform = XMMatrixTranspose(WVP);
-	d3d11DevCon->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
-	d3d11DevCon->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+	Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
+	wvp->setConstantForVS(d3d11Device, d3d11DevCon);
 
 	indexSize = pass->model->indexSize;
 	d3d11DevCon->RSSetState(clockwiseCullMode);

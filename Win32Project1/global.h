@@ -12,3 +12,9 @@ void static validateResult(HRESULT result, char* errorMessage) {
 		exit(-1);
 	}
 }
+
+void static releaseIfNotNull(IUnknown *obj) {
+	if (obj) {
+		obj->Release();
+	}
+}
