@@ -13,16 +13,8 @@ DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), h
 
 	initCamera();
 	pass = new Pass(d3d11Device, d3d11DevCon, camera);
-
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = width;
-	viewport.Height = height;
-	viewport.MaxDepth = 1.0f;
-	viewport.MinDepth = 0.0f;
-	d3d11DevCon->RSSetViewports(1, &viewport);
+	pass->loadShaders("VertexShader.hlsl", "PixelShader.hlsl");
+	pass->initViewport(width, height);
 
 	initScene(width, height);
 }
@@ -81,7 +73,6 @@ bool DxWrapper::initializeDirect3d11App(HWND outputWindow, int width, int height
 	d3d11Device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
 	d3d11DevCon->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
 
-	initBlendEquation();
 	return true;
 }
 
@@ -110,27 +101,23 @@ void DxWrapper::updateScene() {
 }
 
 void DxWrapper::initScene(int width, int height) {
-	loadShaders();
 	initModel();
 	initTexture();
 	initLight();
 }
 
 void DxWrapper::initLight() {
+	cbPerFrame cbPerFra;
 	cbPerFra.light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
 	cbPerFra.light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
 	cbPerFra.light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
+
+	Constant* light = new Constant(&cbPerFra, sizeof(cbPerFra), 0);
+	pass->setConstantForPS(light);
 }
 
 void DxWrapper::initCamera() {
 	camera = new Camera(XMFLOAT4(0, 3, -8, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
-}
-
-void DxWrapper::loadShaders() {
-	vertexShader = new Shader("VertexShader.hlsl", VERTEX_SHADER);
-	pixelShader = new Shader("PixelShader.hlsl", PIXEL_SHADER);
-	vertexShader->setShader(d3d11Device, d3d11DevCon);
-	pixelShader->setShader(d3d11Device, d3d11DevCon);
 }
 
 void DxWrapper::initModel() {
@@ -200,74 +187,15 @@ void DxWrapper::initModel() {
 	};
 	pass->model = new Model(v, ARRAYSIZE(v), idx, ARRAYSIZE(idx));
 
-	// TODO set shaders in pass's own method
-	pass->model->vsBuffer = vertexShader->buffer;
 	pass->IASetModel();
 }
-
-void DxWrapper::initBlendEquation() {
-	D3D11_BLEND_DESC desc;
-	ZeroMemory(&desc, sizeof(desc));
-
-	D3D11_RENDER_TARGET_BLEND_DESC targetDesc;
-	ZeroMemory(&targetDesc, sizeof(targetDesc));
-	targetDesc.BlendEnable = true;
-	targetDesc.SrcBlend = D3D11_BLEND_SRC_COLOR;
-	targetDesc.DestBlend = D3D11_BLEND_DEST_COLOR;
-	targetDesc.BlendOp = D3D11_BLEND_OP_ADD;
-	targetDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
-	targetDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
-	targetDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	targetDesc.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
-
-	desc.AlphaToCoverageEnable = false;
-	desc.RenderTarget[0] = targetDesc;
-
-	d3d11Device->CreateBlendState(&desc, &transparency);
-
-	D3D11_RASTERIZER_DESC rasterizerDesc;
-	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
-
-	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	rasterizerDesc.CullMode = D3D11_CULL_BACK;
-	rasterizerDesc.FrontCounterClockwise = true;
-	d3d11Device->CreateRasterizerState(&rasterizerDesc, &counterClockwiseCullMode);
-
-	rasterizerDesc.FrontCounterClockwise = false;
-	d3d11Device->CreateRasterizerState(&rasterizerDesc, &clockwiseCullMode);
-}
-
 
 void DxWrapper::drawScene() {
 	D3DXCOLOR bgColor(0.1f, 0.1f, 0.3f, 0.0f);
 	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	// light
-	Constant* light = new Constant(&cbPerFra, sizeof(cbPerFra), 0);
-	light->setConstantForPS(d3d11Device, d3d11DevCon);
-
-	// blend
-	float blendFactor[] = { 0.75f, 0.75f, 0.75f, 1.0f };
-	d3d11DevCon->OMSetBlendState(0, 0, 0xffffffff);
-	d3d11DevCon->OMSetBlendState(transparency, blendFactor, 0xffffffff);
-
-	XMFLOAT4X4 view = camera->getViewMatrix();
-	XMMATRIX camView = XMLoadFloat4x4(&view);
-	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
-	XMMATRIX world = XMMatrixTranslation(0, 0, 5);
-	XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
-
-	cbPerObj.WVP = WVP;
-	cbPerObj.normalTransform = XMMatrixTranspose(WVP);
-	Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
-	wvp->setConstantForVS(d3d11Device, d3d11DevCon);
-
-	indexSize = pass->model->indexSize;
-	d3d11DevCon->RSSetState(clockwiseCullMode);
-	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
-	d3d11DevCon->RSSetState(counterClockwiseCullMode);
-	d3d11DevCon->DrawIndexed(indexSize, 0, 0);
+	
+	pass->draw();
 
 //Present the backbuffer to the screen
 	swapChain->Present(0, 0);
@@ -279,10 +207,6 @@ bool DxWrapper::releaseDirect3d11App() {
 	releaseIfNotNull(d3d11Device);
 	releaseIfNotNull(depthStencilView);
 	releaseIfNotNull(depthStencilBuffer);
-	releaseIfNotNull(cbPerObjectBuffer);
-	releaseIfNotNull(transparency);
-	releaseIfNotNull(counterClockwiseCullMode);
-	releaseIfNotNull(clockwiseCullMode);
 	return true;
 }
 

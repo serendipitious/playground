@@ -11,11 +11,6 @@
 #include "Shader.h"
 #include "Constant.h"
 
-struct cbPerObject {
-	XMMATRIX WVP;
-	XMMATRIX normalTransform;
-};
-
 struct Light {
 	XMFLOAT3 dir;
 	float pad;
@@ -54,28 +49,12 @@ private:
 
 	// new version classes
 	Pass *pass;
-	Shader *vertexShader;
-	Shader *pixelShader;
-
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
 
-	// geometric buffers
-	ID3D11Buffer* cbPerObjectBuffer;
-	ID3D11Buffer* cbPerFrameBuffer;
-
 	ID3D11ShaderResourceView* texture;
 	ID3D11SamplerState* textureSamplerState;
-
-	cbPerObject cbPerObj;
-	cbPerFrame cbPerFra;
-
-	// blend
-	ID3D11BlendState *transparency;
-	ID3D11RasterizerState *counterClockwiseCullMode;
-	ID3D11RasterizerState *clockwiseCullMode;
-
 
 	int width;
 	int height;
@@ -84,11 +63,9 @@ private:
 
 	bool initializeDirect3d11App(HWND outputWindow, int width, int height);
 	bool releaseDirect3d11App();
-	void loadShaders();
 	void initModel();
 	void initTexture();
 	void initCamera();
-	void initBlendEquation();
 
 	void initScene(int widht, int height);
 	void initLight();

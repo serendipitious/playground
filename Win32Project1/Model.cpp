@@ -19,7 +19,7 @@ Model::~Model() {
 	releaseIfNotNull(indexBuffer);
 }
 
-void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context) {
+void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer) {
 	// vertex buffer
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
