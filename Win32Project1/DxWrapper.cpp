@@ -16,6 +16,9 @@ DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), h
 	pass->loadShaders("VertexShader.hlsl", "PixelShader.hlsl");
 	pass->initViewport(width, height);
 
+	Texture *texture = new Texture("braynzar.jpg", 0);
+	pass->setTexture(texture);
+
 	initScene(width, height);
 }
 
@@ -76,33 +79,12 @@ bool DxWrapper::initializeDirect3d11App(HWND outputWindow, int width, int height
 	return true;
 }
 
-void DxWrapper::initTexture() {
-	HRESULT result = D3DX11CreateShaderResourceViewFromFile(d3d11Device, "braynzar.jpg", NULL, NULL, &texture, NULL);
-	validateResult(result, "create texture failed");
-	
-	D3D11_SAMPLER_DESC samplerDesc;
-	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	d3d11Device->CreateSamplerState(&samplerDesc, &textureSamplerState);
-	d3d11DevCon->PSSetShaderResources(0, 1, &texture);
-	d3d11DevCon->PSSetSamplers(0, 1, &textureSamplerState);
-}
-
-
 void DxWrapper::updateScene() {
 	
 }
 
 void DxWrapper::initScene(int width, int height) {
 	initModel();
-	initTexture();
 	initLight();
 }
 

@@ -10,6 +10,7 @@
 #include "global.h"
 #include "Shader.h"
 #include "Constant.h"
+#include "Texture.h"
 
 struct Light {
 	XMFLOAT3 dir;
@@ -53,9 +54,6 @@ private:
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
 
-	ID3D11ShaderResourceView* texture;
-	ID3D11SamplerState* textureSamplerState;
-
 	int width;
 	int height;
 
@@ -64,7 +62,6 @@ private:
 	bool initializeDirect3d11App(HWND outputWindow, int width, int height);
 	bool releaseDirect3d11App();
 	void initModel();
-	void initTexture();
 	void initCamera();
 
 	void initScene(int widht, int height);

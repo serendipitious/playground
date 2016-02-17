@@ -88,6 +88,7 @@
     <ClCompile Include="Pass.cpp" />
     <ClCompile Include="Constant.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -98,6 +99,7 @@
     <ClInclude Include="Constant.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32Project1.rc" />

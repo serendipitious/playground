@@ -39,6 +39,10 @@ void Pass::setConstantForVS(Constant* constant) {
 	constant->setConstantForVS(device, context);
 }
 
+void Pass::setTexture(Texture* texture) {
+	texture->setTexture(device, context);
+}
+
 Pass::~Pass() {
 	if (model) {
 		delete model;
