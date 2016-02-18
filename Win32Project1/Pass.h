@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Constant.h"
 #include "Texture.h"
+#include <list>
 
 struct cbPerObject {
 	XMMATRIX WVP;
@@ -41,6 +42,13 @@ private:
 	int width;
 	int height;
 
+	std::list<Texture*> textureList = std::list<Texture*>();
+	std::list<Constant*> constantForVSList = std::list<Constant*>();
+	std::list<Constant*> constantForPSList = std::list<Constant*>();
+
 	void initViewport();
+
+	BOOL hasInitDraw = FALSE;
+	void initDraw();
 };
 

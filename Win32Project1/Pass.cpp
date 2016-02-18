@@ -23,6 +23,7 @@ void Pass::initViewport(int width, int height) {
 void Pass::loadShaders(char* vsFilename, char* psFilename) {
 	vertexShader = new Shader(vsFilename, VERTEX_SHADER);
 	pixelShader = new Shader(psFilename, PIXEL_SHADER);
+
 	vertexShader->setShader(device, context);
 	pixelShader->setShader(device, context);
 }
@@ -32,15 +33,15 @@ void Pass::IASetModel() {
 }
 
 void Pass::setConstantForPS(Constant* constant) {
-	constant->setConstantForPS(device, context);
+	constantForPSList.push_back(constant);
 }
 
 void Pass::setConstantForVS(Constant* constant) {
-	constant->setConstantForVS(device, context);
+	constantForVSList.push_back(constant);
 }
 
 void Pass::setTexture(Texture* texture) {
-	texture->setTexture(device, context);
+	textureList.push_back(texture);
 }
 
 Pass::~Pass() {
@@ -49,7 +50,29 @@ Pass::~Pass() {
 	}
 }
 
+void Pass::initDraw() {
+	if (hasInitDraw) {
+		return;
+	}
+	hasInitDraw = TRUE;
+
+	for (std::list<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
+		(*i)->setTexture(device, context);
+	}
+
+	for (std::list<Constant*>::iterator i = constantForVSList.begin(); i != constantForVSList.end(); i++) {
+		(*i)->setConstantForVS(device, context);
+	}
+
+	for (std::list<Constant*>::iterator i = constantForPSList.begin(); i != constantForPSList.end(); i++) {
+		(*i)->setConstantForPS(device, context);
+	}
+
+	IASetModel();
+}
+
 void Pass::draw() {
+	initDraw();
 
 	XMFLOAT4X4 view = camera->getViewMatrix();
 	XMMATRIX camView = XMLoadFloat4x4(&view);
@@ -61,7 +84,7 @@ void Pass::draw() {
 	cbPerObj.WVP = WVP;
 	cbPerObj.normalTransform = XMMatrixTranspose(WVP);
 	Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
-	this->setConstantForVS(wvp);
+	wvp->setConstantForVS(device, context);
 
 	int indexSize = model->dataSize;
 	context->DrawIndexed(indexSize, 0, 0);

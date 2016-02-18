@@ -50,6 +50,7 @@ private:
 
 	// new version classes
 	Pass *pass;
+	Pass *environment;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
