@@ -24,23 +24,21 @@ void Pass::loadShaders(char* vsFilename, char* psFilename) {
 	vertexShader = new Shader(vsFilename, VERTEX_SHADER);
 	pixelShader = new Shader(psFilename, PIXEL_SHADER);
 
-	vertexShader->setShader(device, context);
-	pixelShader->setShader(device, context);
 }
 
 void Pass::IASetModel() {
 	model->IASetModel(device, context, vertexShader->buffer);
 }
 
-void Pass::setConstantForPS(Constant* constant) {
+void Pass::addConstantForPS(Constant* constant) {
 	constantForPSList.push_back(constant);
 }
 
-void Pass::setConstantForVS(Constant* constant) {
+void Pass::addConstantForVS(Constant* constant) {
 	constantForVSList.push_back(constant);
 }
 
-void Pass::setTexture(Texture* texture) {
+void Pass::addTexture(Texture* texture) {
 	textureList.push_back(texture);
 }
 
@@ -51,10 +49,9 @@ Pass::~Pass() {
 }
 
 void Pass::initDraw() {
-	if (hasInitDraw) {
-		return;
-	}
-	hasInitDraw = TRUE;
+
+	vertexShader->setShader(device, context);
+	pixelShader->setShader(device, context);
 
 	for (std::list<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
 		(*i)->setTexture(device, context);
@@ -76,7 +73,7 @@ void Pass::draw() {
 
 	XMFLOAT4X4 view = camera->getViewMatrix();
 	XMMATRIX camView = XMLoadFloat4x4(&view);
-	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f);
+	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
 	XMMATRIX world = XMMatrixTranslation(0, 0, 5);
 	XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
 

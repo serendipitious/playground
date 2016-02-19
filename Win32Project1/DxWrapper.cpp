@@ -11,8 +11,11 @@ DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), h
 	pass->initViewport(width, height);
 
 	Texture *texture = new Texture("resources\\braynzar.jpg", 0);
-	pass->setTexture(texture);
+	pass->addTexture(texture);
 
+	environment = new Pass(d3d11Device, d3d11DevCon, camera);
+	environment->initViewport(width, height);
+	environment->loadShaders("shaders\\environment\\VertexShader.hlsl", "shaders\\environment\\PixelShader.hlsl");
 	initScene(width, height);
 }
 
@@ -89,7 +92,7 @@ void DxWrapper::initLight() {
 	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
 
 	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
-	pass->setConstantForPS(light);
+	pass->addConstantForPS(light);
 }
 
 void DxWrapper::initCamera() {
@@ -146,6 +149,7 @@ void DxWrapper::initModel() {
 	idx[30] = 20;idx[31] = 21;idx[32] = 22;idx[33] = 20;idx[34] = 22;idx[35] = 23;
 
 	pass->model = new Model(v, vertexSize, idx, indexSize);
+	environment->model = new Model(v, vertexSize, idx, indexSize);
 }
 
 void DxWrapper::drawScene() {
@@ -153,7 +157,7 @@ void DxWrapper::drawScene() {
 	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
-	//environment->draw();
+	environment->draw();
 	pass->draw();
 
 //Present the backbuffer to the screen

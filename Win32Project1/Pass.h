@@ -29,9 +29,9 @@ public:
 	void loadShaders(char* vsFilename, char* psFilename);
 	void initViewport(int width, int height);
 		
-	void setConstantForVS(Constant* constant);
-	void setConstantForPS(Constant* constant);
-	void setTexture(Texture* texture);
+	void addConstantForVS(Constant* constant);
+	void addConstantForPS(Constant* constant);
+	void addTexture(Texture* texture);
 
 private:
 	ID3D11Device* device;
@@ -48,7 +48,6 @@ private:
 
 	void initViewport();
 
-	BOOL hasInitDraw = FALSE;
 	void initDraw();
 };
 
