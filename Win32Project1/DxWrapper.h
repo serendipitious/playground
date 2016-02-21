@@ -10,18 +10,9 @@
 #include "global.h"
 #include "Shader.h"
 #include "Constant.h"
-#include "Texture.h"
-
-struct Light {
-	XMFLOAT3 dir;
-	float pad;
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
-};
-
-struct cbPerFrame {
-	Light light;
-};
+#include "texture/Texture.h"
+#include "ModelTools.h"
+#include "texture/SkyBox.h"
 
 class DxWrapper
 {

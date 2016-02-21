@@ -11,11 +11,36 @@ DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), h
 	pass->initViewport(width, height);
 
 	Texture *texture = new Texture("resources\\braynzar.jpg", 0);
+	texture->loadTexture(d3d11Device, d3d11DevCon);
 	pass->addTexture(texture);
 
+
+	// environment pass
 	environment = new Pass(d3d11Device, d3d11DevCon, camera);
 	environment->initViewport(width, height);
 	environment->loadShaders("shaders\\environment\\VertexShader.hlsl", "shaders\\environment\\PixelShader.hlsl");
+
+	SkyBox *skyBox = new SkyBox("resources\\skymap.dds", 0);
+	skyBox->loadTexture(d3d11Device, d3d11DevCon);
+	environment->addTexture(skyBox);
+
+	// none cull mode
+	D3D11_RASTERIZER_DESC cmdesc;
+	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+	cmdesc.FillMode = D3D11_FILL_SOLID;
+	cmdesc.CullMode = D3D11_CULL_BACK;
+	cmdesc.FrontCounterClockwise = false;
+	cmdesc.CullMode = D3D11_CULL_NONE;
+
+	environment->setRasterizerState(cmdesc);
+
+	D3D11_DEPTH_STENCIL_DESC dssDesc;
+	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+	dssDesc.DepthEnable = true;
+	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	environment->setDepthStencilState(dssDesc);
+
 	initScene(width, height);
 }
 
@@ -100,56 +125,8 @@ void DxWrapper::initCamera() {
 }
 
 void DxWrapper::initModel() {
-	int vertexSize = 24;
-	Vertex *v = new Vertex[24];
-		// Front Face
-	v[0] = Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, -1.0f);
-	v[1] = Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, -1.0f);
-	v[2] = Vertex(1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f);
-	v[3] = Vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f);
-
-		// Back Face
-	v[4] = Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-	v[5] = Vertex(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f);
-	v[6] = Vertex(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-	v[7] = Vertex(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-
-		// Top Face
-	v[8] = Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, -1.0f);
-	v[9] = Vertex(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-	v[10] = Vertex(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-	v[11] = Vertex(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f);
-
-		// Bottom Face
-	v[12] = Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f);
-	v[13] = Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f);
-	v[14] = Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-	v[15] = Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f);
-
-		// Left Face
-	v[16] = Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-	v[17] = Vertex(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-	v[18] = Vertex(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, -1.0f);
-	v[19] = Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f);
-
-		// Right Face
-	v[20] = Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f);
-	v[21] = Vertex(1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f);
-	v[22] = Vertex(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-	v[23] = Vertex(1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f);
-
-
-	int indexSize = 36;
-	DWORD *idx = new DWORD[indexSize];
-	idx[0] = 0;idx[1] = 1;idx[2] = 2;idx[3] = 0;idx[4] = 2;idx[5] = 3;
-	idx[6] = 4;idx[7] = 5;idx[8] = 6;idx[9] = 4;idx[10] = 6;idx[11] = 7;
-	idx[12] = 8;idx[13] = 9;idx[14] = 10;idx[15] = 8;idx[16] = 10;idx[17] = 11;
-	idx[18] = 12;idx[19] = 13;idx[20] = 14;idx[21] = 12;idx[22] = 14;idx[23] = 15;
-	idx[24] = 16;idx[25] = 17;idx[26] = 18;idx[27] = 16;idx[28] = 18;idx[29] = 19;
-	idx[30] = 20;idx[31] = 21;idx[32] = 22;idx[33] = 20;idx[34] = 22;idx[35] = 23;
-
-	pass->model = new Model(v, vertexSize, idx, indexSize);
-	environment->model = new Model(v, vertexSize, idx, indexSize);
+	pass->model = createCube();
+	environment->model = CreateSphere(10, 10);
 }
 
 void DxWrapper::drawScene() {
@@ -157,7 +134,13 @@ void DxWrapper::drawScene() {
 	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
+	// draw sky box
+	XMFLOAT4X4 identity;
+	matrixBuffer *m = new matrixBuffer;
+	m->matrix = XMMatrixTranspose(XMMatrixScaling(5.0f, 5.0f, 5.0f) * XMMatrixTranslation(camera->position.x, camera->position.y, camera->position.z));
+	environment->addConstantForVS(new Constant(m, sizeof(matrixBuffer), 1));
 	environment->draw();
+
 	pass->draw();
 
 //Present the backbuffer to the screen

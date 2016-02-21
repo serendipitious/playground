@@ -88,20 +88,21 @@
     <ClCompile Include="Pass.cpp" />
     <ClCompile Include="Constant.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="SkyBox.cpp" />
-    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="texture\SkyBox.cpp" />
+    <ClCompile Include="texture\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DxWrapper.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelTools.h" />
     <ClInclude Include="Pass.h" />
     <ClInclude Include="Constant.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="SkyBox.h" />
-    <ClInclude Include="Texture.h" />
+    <ClInclude Include="texture\SkyBox.h" />
+    <ClInclude Include="texture\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32Project1.rc" />
@@ -126,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\braynzar.jpg" />
+    <Image Include="resources\skymap.dds" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

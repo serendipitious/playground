@@ -6,6 +6,26 @@
 #include <xnamath.h>
 #include <windows.h>
 
+struct cbPerObject {
+	XMMATRIX WVP;
+	XMMATRIX normalTransform;
+};
+
+struct Light {
+	XMFLOAT3 dir;
+	float pad;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+};
+
+struct cbPerFrame {
+	Light light;
+};
+
+struct matrixBuffer {
+	XMMATRIX matrix;
+};
+
 void static validateResult(HRESULT result, char* errorMessage) {
 	if (result) {
 		MessageBox(0, errorMessage, "Error", MB_OK);

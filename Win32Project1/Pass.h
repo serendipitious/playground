@@ -9,13 +9,8 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Constant.h"
-#include "Texture.h"
+#include "texture/Texture.h"
 #include <list>
-
-struct cbPerObject {
-	XMMATRIX WVP;
-	XMMATRIX normalTransform;
-};
 
 class Pass {
 public:
@@ -33,6 +28,11 @@ public:
 	void addConstantForPS(Constant* constant);
 	void addTexture(Texture* texture);
 
+
+	// states
+	void setRasterizerState(D3D11_RASTERIZER_DESC desc);
+	void setDepthStencilState(D3D11_DEPTH_STENCIL_DESC desc);
+
 private:
 	ID3D11Device* device;
 	ID3D11DeviceContext* context;
@@ -45,6 +45,9 @@ private:
 	std::list<Texture*> textureList = std::list<Texture*>();
 	std::list<Constant*> constantForVSList = std::list<Constant*>();
 	std::list<Constant*> constantForPSList = std::list<Constant*>();
+
+	ID3D11RasterizerState *rasterizerState = NULL;
+	ID3D11DepthStencilState *depthStencilState = NULL;
 
 	void initViewport();
 

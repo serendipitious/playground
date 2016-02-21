@@ -66,6 +66,14 @@ void Pass::initDraw() {
 	}
 
 	IASetModel();
+
+	if (rasterizerState) {
+		context->RSSetState(rasterizerState);
+	}
+
+	if (depthStencilState) {
+		context->OMSetDepthStencilState(depthStencilState, 0);
+	}
 }
 
 void Pass::draw() {
@@ -73,9 +81,20 @@ void Pass::draw() {
 
 	XMFLOAT4X4 view = camera->getViewMatrix();
 	XMMATRIX camView = XMLoadFloat4x4(&view);
-	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
-	XMMATRIX world = XMMatrixTranslation(0, 0, 5);
+	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float) width / height, 1.0f, 1000.0f);
+	XMMATRIX world = XMMatrixIdentity();
 	XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
+
+	/**************************/
+
+	D3D11_DEPTH_STENCIL_DESC dssDesc;
+	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+	dssDesc.DepthEnable = true;
+	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+
+	/*******************************************/
 
 	cbPerObject cbPerObj;
 	cbPerObj.WVP = WVP;
@@ -83,6 +102,14 @@ void Pass::draw() {
 	Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
 	wvp->setConstantForVS(device, context);
 
-	int indexSize = model->dataSize;
+	int indexSize = model->indexSize;
 	context->DrawIndexed(indexSize, 0, 0);
+}
+
+void Pass::setRasterizerState(D3D11_RASTERIZER_DESC desc) {
+	device->CreateRasterizerState(&desc, &rasterizerState);
+}
+
+void Pass::setDepthStencilState(D3D11_DEPTH_STENCIL_DESC desc) {
+	device->CreateDepthStencilState(&desc, &depthStencilState);
 }

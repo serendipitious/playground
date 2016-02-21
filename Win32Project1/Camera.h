@@ -18,9 +18,10 @@ public:
 	void moveForward();
 	void moveBackward();
 
+	XMFLOAT4 position;
+
 private:
 	XMFLOAT4X4 viewMatrix;
-	XMFLOAT4 position;
 	XMFLOAT4 target;
 	XMFLOAT4 up;
 	float angleStep;
