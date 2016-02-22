@@ -4,10 +4,6 @@
 Texture::Texture(char* filename, int startSlot) : filename(filename), startSlot(startSlot) {
 }
 
-
-Texture::~Texture() {
-}
-
 void Texture::setTexture(ID3D11Device *device, ID3D11DeviceContext *context) {
 	context->PSSetShaderResources(startSlot, 1, &texture);
 	context->PSSetSamplers(startSlot, 1, &textureSamplerState);
@@ -29,4 +25,9 @@ void Texture::loadTexture(ID3D11Device *device, ID3D11DeviceContext *context) {
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	device->CreateSamplerState(&samplerDesc, &textureSamplerState);
+}
+
+Texture::~Texture() {
+	releaseIfNotNull(texture);
+	releaseIfNotNull(textureSamplerState);
 }

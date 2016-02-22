@@ -38,3 +38,9 @@ void static releaseIfNotNull(IUnknown *obj) {
 		obj->Release();
 	}
 }
+
+void static deleteIfNotNull(void *p) {
+	if (p) {
+		delete p;
+	}
+}

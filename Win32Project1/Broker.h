@@ -14,11 +14,11 @@
 #include "ModelTools.h"
 #include "texture/SkyBox.h"
 
-class DxWrapper
+class Broker
 {
 public:
-	DxWrapper(HWND outputWindow, int width, int height);
-	~DxWrapper();
+	Broker(HWND outputWindow, int width, int height);
+	~Broker();
 
 	void updateScene();
 	void drawScene();

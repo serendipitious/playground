@@ -5,6 +5,9 @@ Shader::Shader(char *f, int t) : filename(f), shaderType(t) {
 }
 
 Shader::~Shader() {
+	deleteIfNotNull(vs);
+	deleteIfNotNull(ps);
+	deleteIfNotNull(buffer);
 }
 
 void Shader::setShader(ID3D11Device *device, ID3D11DeviceContext *context) {

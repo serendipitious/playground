@@ -17,6 +17,7 @@ Model::~Model() {
 	delete indices;
 	releaseIfNotNull(vertexBuffer);
 	releaseIfNotNull(indexBuffer);
+	releaseIfNotNull(layout);
 }
 
 void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer) {

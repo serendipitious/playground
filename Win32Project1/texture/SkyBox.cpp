@@ -5,9 +5,6 @@ SkyBox::SkyBox(char *filename, int startSlot) : Texture(filename, startSlot) {
 }
 
 
-SkyBox::~SkyBox() {
-}
-
 void SkyBox::loadTexture(ID3D11Device *device, ID3D11DeviceContext *context) {
 	D3DX11_IMAGE_LOAD_INFO loadSMInfo;
 	loadSMInfo.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
@@ -44,4 +41,9 @@ void SkyBox::loadTexture(ID3D11Device *device, ID3D11DeviceContext *context) {
 void SkyBox::setTexture(ID3D11Device *device, ID3D11DeviceContext *context) {
 	context->PSSetShaderResources(0, 1, &resourceView);
 	context->PSSetSamplers(0, 1, &textureSamplerState);
+}
+
+SkyBox::~SkyBox() {
+	releaseIfNotNull(resourceView);
+	releaseIfNotNull(textureSamplerState);
 }

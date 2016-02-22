@@ -8,17 +8,17 @@
 #include <d3dx11.h>
 #include <d3dx10.h>
 #include <xnamath.h>
-#include "DxWrapper.h"
+#include "Broker.h"
 
 LPCTSTR WndClassName = "firstwindow";
 HWND hwnd = NULL;
 
 const int Width = 768;
 const int Height = 640;
-DxWrapper  *dxWrapper;
+Broker  *broker;
 
 bool InitializeWindow(HINSTANCE hInstance,int ShowWnd,int width, int height, bool windowed);
-int messageloop(DxWrapper *);
+int messageloop(Broker *);
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -28,8 +28,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	dxWrapper = new DxWrapper(hwnd, Width, Height);
-	messageloop(dxWrapper);
+	broker = new Broker(hwnd, Width, Height);
+	messageloop(broker);
 	return 0;
 }
 
@@ -82,7 +82,7 @@ bool InitializeWindow(HINSTANCE hInstance, int ShowWnd, int width, int height, b
 
 	return true;
 }
-int messageloop(DxWrapper *dxWrapper) {
+int messageloop(Broker *broker) {
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
 	while (true) {
@@ -94,8 +94,8 @@ int messageloop(DxWrapper *dxWrapper) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
-			dxWrapper->updateScene();
-			dxWrapper->drawScene();
+			broker->updateScene();
+			broker->drawScene();
 		}
 	}
 	return msg.wParam;
@@ -107,24 +107,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		switch (wParam) {
 		case VK_ESCAPE:
 			DestroyWindow(hwnd);
+			delete broker;
 			break;
 		case VK_LEFT:
-			dxWrapper->rotateLeft();
+			broker->rotateLeft();
 			break;
 		case VK_RIGHT:
-			dxWrapper->rotateRight();
+			broker->rotateRight();
 			break;
 		case VK_UP:
-			dxWrapper->rotateUp();
+			broker->rotateUp();
 			break;
 		case VK_DOWN:
-			dxWrapper->rotateDown();
+			broker->rotateDown();
 			break;
 		case VK_SHIFT:
-			dxWrapper->moveBackward();
+			broker->moveBackward();
 			break;
 		case VK_SPACE:
-			dxWrapper->moveForward();
+			broker->moveForward();
 			break;
 		}
 		return 0;

@@ -82,7 +82,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DxWrapper.cpp" />
+    <ClCompile Include="broker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Pass.cpp" />
@@ -93,7 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="DxWrapper.h" />
+    <ClInclude Include="Broker.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelTools.h" />

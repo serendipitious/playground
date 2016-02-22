@@ -1,6 +1,6 @@
-#include "DxWrapper.h"
+#include "Broker.h"
 
-DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), height(height) {
+Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(height) {
 	initializeDirect3d11App(outputWindow, width, height);
 
 	initCamera();
@@ -44,7 +44,7 @@ DxWrapper::DxWrapper(HWND outputWindow, int width, int height) : width(width), h
 	initScene(width, height);
 }
 
-bool DxWrapper::initializeDirect3d11App(HWND outputWindow, int width, int height) {
+bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
 	DXGI_MODE_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(DXGI_MODE_DESC));
 	bufferDesc.Width = width;
@@ -101,16 +101,16 @@ bool DxWrapper::initializeDirect3d11App(HWND outputWindow, int width, int height
 	return true;
 }
 
-void DxWrapper::updateScene() {
+void Broker::updateScene() {
 	
 }
 
-void DxWrapper::initScene(int width, int height) {
+void Broker::initScene(int width, int height) {
 	initModel();
 	initLight();
 }
 
-void DxWrapper::initLight() {
+void Broker::initLight() {
 	cbPerFrame *cbPerFra = new cbPerFrame();
 	cbPerFra->light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
 	cbPerFra->light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
@@ -120,16 +120,16 @@ void DxWrapper::initLight() {
 	pass->addConstantForPS(light);
 }
 
-void DxWrapper::initCamera() {
+void Broker::initCamera() {
 	camera = new Camera(XMFLOAT4(0, 3, -8, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
 }
 
-void DxWrapper::initModel() {
+void Broker::initModel() {
 	pass->model = createCube();
 	environment->model = CreateSphere(10, 10);
 }
 
-void DxWrapper::drawScene() {
+void Broker::drawScene() {
 	D3DXCOLOR bgColor(0.1f, 0.1f, 0.3f, 0.0f);
 	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
 	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -147,7 +147,7 @@ void DxWrapper::drawScene() {
 	swapChain->Present(0, 0);
 }
 
-bool DxWrapper::releaseDirect3d11App() {
+bool Broker::releaseDirect3d11App() {
 	releaseIfNotNull(swapChain);
 	releaseIfNotNull(d3d11DevCon);
 	releaseIfNotNull(d3d11Device);
@@ -156,30 +156,33 @@ bool DxWrapper::releaseDirect3d11App() {
 	return true;
 }
 
-void DxWrapper::rotateLeft() {
+void Broker::rotateLeft() {
 	camera->rotateLeft();
 }
 
-void DxWrapper::rotateRight() {
+void Broker::rotateRight() {
 	camera->rotateRight();
 }
 
-void DxWrapper::rotateUp() {
+void Broker::rotateUp() {
 	camera->rotateUp();
 }
 
-void DxWrapper::rotateDown() {
+void Broker::rotateDown() {
 	camera->rotateDown();
 }
 
-void DxWrapper::moveForward() {
+void Broker::moveForward() {
 	camera->moveForward();
 }
 
-void DxWrapper::moveBackward() {
+void Broker::moveBackward() {
 	camera->moveBackward();
 }
 
-DxWrapper::~DxWrapper() {
+Broker::~Broker() {
 	releaseDirect3d11App();
+	deleteIfNotNull(pass);
+	deleteIfNotNull(environment);
+	deleteIfNotNull(camera);
 }

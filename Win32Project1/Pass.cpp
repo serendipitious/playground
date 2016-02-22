@@ -43,8 +43,22 @@ void Pass::addTexture(Texture* texture) {
 }
 
 Pass::~Pass() {
-	if (model) {
-		delete model;
+	deleteIfNotNull(model);
+	deleteIfNotNull(vertexShader);
+	deleteIfNotNull(pixelShader);
+	releaseIfNotNull(rasterizerState);
+	releaseIfNotNull(depthStencilState);
+	
+	for (std::list<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
+		deleteIfNotNull(*i);
+	}
+
+	for (std::list<Constant*>::iterator i = constantForPSList.begin(); i != constantForPSList.end(); i++) {
+		deleteIfNotNull(*i);
+	}
+
+	for (std::list<Constant*>::iterator i = constantForVSList.begin(); i != constantForVSList.end(); i++) {
+		deleteIfNotNull(*i);
 	}
 }
 
@@ -84,17 +98,6 @@ void Pass::draw() {
 	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float) width / height, 1.0f, 1000.0f);
 	XMMATRIX world = XMMatrixIdentity();
 	XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
-
-	/**************************/
-
-	D3D11_DEPTH_STENCIL_DESC dssDesc;
-	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	dssDesc.DepthEnable = true;
-	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-
-	/*******************************************/
 
 	cbPerObject cbPerObj;
 	cbPerObj.WVP = WVP;
