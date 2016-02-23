@@ -10,7 +10,7 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 	// TODO refine init view port logic
 	pass->initViewport(width, height);
 
-	Texture *texture = new Texture("resources\\braynzar.jpg", 0);
+	Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
 	texture->loadTexture(d3d11Device, d3d11DevCon);
 	pass->addTexture(texture);
 
@@ -125,7 +125,8 @@ void Broker::initCamera() {
 }
 
 void Broker::initModel() {
-	pass->model = createCube();
+	//pass->model = createCube();
+	pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
 	environment->model = CreateSphere(10, 10);
 }
 

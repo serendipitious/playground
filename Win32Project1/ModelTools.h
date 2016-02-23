@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Model.h"
+#include <fstream>
+#include <iostream>
 #include <vector>
+#include <sstream>
+#include <string>
 
 static Model* createCube() {
 	int vertexSize = 24;
@@ -134,4 +138,63 @@ static Model* CreateSphere(int LatLines, int LongLines) {
 
 	return new Model(vertices, NumSphereVertices, indices, NumSphereFaces * 3);
 
+}
+
+template<class T>
+static T* vectorToArray(std::vector<T> v) {
+	T *arr = new T[v.size()];
+	for (int i = 0; i < v.size(); i++) {
+		arr[i] = v[i];
+	}
+	return arr;
+}
+
+static Model* loadObjModel(char *objFilename) {
+	std::ifstream fin(objFilename);
+	if (!fin.is_open()) {
+		MessageBox(0, objFilename, "Error", MB_OK);
+		exit(-1);
+	}
+
+	std::vector<Vertex> vertices;
+	std::vector<DWORD> indices;
+
+	int vt = 0;
+	int vn = 0;
+
+	while (!fin.eof()) {
+		char line[256];
+		fin.getline(line, 256);
+		std::stringstream(std::string(line));
+		char flag[10];
+		fin >> flag;
+
+		if (strcmp(flag, "v") == 0) {
+			float x, y, z;
+			fin >> x >> y >> z;
+			vertices.push_back(Vertex(x, y, z, 0, 0, 0, 0, 0));
+		}
+		else if (strcmp(flag, "vt") == 0) {
+			float u, v;
+			fin >> u >> v;
+			vertices[vt].texcoord = XMFLOAT2(u, v);
+			vt++;
+		}
+		else if (strcmp(flag, "vn") == 0) {
+			float nx, ny, nz;
+			fin >> nx >> ny >> nz;
+			vertices[vn].normal = XMFLOAT3(nx, ny, nz);
+			vn++;
+		}
+		else if (strcmp(flag, "f") == 0) {
+			char pair[30];
+			for (int i = 0; i < 3; i++) {
+				fin >> pair;
+				int index, useless1, useless2;
+				sscanf_s(pair, "%d/%d/%d", &index, &useless1, &useless2);
+				indices.push_back(index - 1);
+			}
+		}
+	}
+	return new Model(vectorToArray(vertices), vertices.size(), vectorToArray(indices), indices.size());
 }
