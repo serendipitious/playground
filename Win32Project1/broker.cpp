@@ -4,24 +4,38 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 	initializeDirect3d11App(outputWindow, width, height);
 
 	initCamera();
-	pass = new Pass(d3d11Device, d3d11DevCon, camera);
+
+	initPass();
+	initEnvironment();
+	initDebugPass();
+
+	initScene(width, height);
+}
+
+void Broker::initPass() {
+	debugRenderTarget = new RenderTarget();
+	debugRenderTarget->init(device, width, height);
+	debugRenderTarget->setAutoClean(true);
+	pass = new Pass(device, context, camera, debugRenderTarget);
 	pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
 
 	// TODO refine init view port logic
 	pass->initViewport(width, height);
 
 	Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
-	texture->loadTexture(d3d11Device, d3d11DevCon);
+	texture->loadTexture(device, context);
 	pass->addTexture(texture);
+}
 
+void Broker::initEnvironment() {
 
 	// environment pass
-	environment = new Pass(d3d11Device, d3d11DevCon, camera);
+	environment = new Pass(device, context, camera, defaultRenderTarget);
 	environment->initViewport(width, height);
 	environment->loadShaders("shaders\\environment\\VertexShader.hlsl", "shaders\\environment\\PixelShader.hlsl");
 
 	SkyBox *skyBox = new SkyBox("resources\\skymap.dds", 0);
-	skyBox->loadTexture(d3d11Device, d3d11DevCon);
+	skyBox->loadTexture(device, context);
 	environment->addTexture(skyBox);
 
 	// none cull mode
@@ -41,7 +55,18 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	environment->setDepthStencilState(dssDesc);
 
-	initScene(width, height);
+}
+
+void Broker::initDebugPass() {
+	debugPass = new DebugPass(device, context, camera, defaultRenderTarget);
+
+	debugPass->initViewport(width, height);
+	debugPass->loadShaders("shaders\\debugPass\\VertexShader.hlsl", "shaders\\debugPass\\PixelShader.hlsl");
+
+	//Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
+	Texture *texture = new RenderTargetTexture(debugRenderTarget->getTexture(), 0);
+	texture->loadTexture(device, context);
+	debugPass->addTexture(texture);
 }
 
 bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
@@ -68,18 +93,15 @@ bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
 
 	//Create our SwapChain
 	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL,
-		D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &d3d11Device, NULL, &d3d11DevCon);
+		D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, NULL, &context);
 
 	//Create our BackBuffer
 	ID3D11Texture2D* BackBuffer;
 	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
 
 	//Create our Render Target
-	d3d11Device->CreateRenderTargetView(BackBuffer, NULL, &renderTargetView);
+	device->CreateRenderTargetView(BackBuffer, NULL, &renderTargetView);
 	BackBuffer->Release();
-
-	//Set our Render Target
-	d3d11DevCon->OMSetRenderTargets(1, &renderTargetView, NULL);
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
 	depthStencilDesc.Width = width;
@@ -94,9 +116,10 @@ bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
 
-	d3d11Device->CreateTexture2D(&depthStencilDesc, NULL, &depthStencilBuffer);
-	d3d11Device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
-	d3d11DevCon->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+	device->CreateTexture2D(&depthStencilDesc, NULL, &depthStencilBuffer);
+	device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
+
+	defaultRenderTarget = new RenderTarget(renderTargetView, NULL, depthStencilView);
 
 	return true;
 }
@@ -132,17 +155,21 @@ void Broker::initModel() {
 
 void Broker::drawScene() {
 	D3DXCOLOR bgColor(0.1f, 0.1f, 0.3f, 0.0f);
-	d3d11DevCon->ClearRenderTargetView(renderTargetView, bgColor);
-	d3d11DevCon->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->ClearRenderTargetView(renderTargetView, bgColor);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
 	// draw sky box
 	XMFLOAT4X4 identity;
 	matrixBuffer *m = new matrixBuffer;
 	m->matrix = XMMatrixTranspose(XMMatrixScaling(5.0f, 5.0f, 5.0f) * XMMatrixTranslation(camera->position.x, camera->position.y, camera->position.z));
+
+	// todo change add to set
 	environment->addConstantForVS(new Constant(m, sizeof(matrixBuffer), 1));
 	environment->draw();
 
 	pass->draw();
+
+	debugPass->draw();
 
 //Present the backbuffer to the screen
 	swapChain->Present(0, 0);
@@ -150,8 +177,8 @@ void Broker::drawScene() {
 
 bool Broker::releaseDirect3d11App() {
 	releaseIfNotNull(swapChain);
-	releaseIfNotNull(d3d11DevCon);
-	releaseIfNotNull(d3d11Device);
+	releaseIfNotNull(context);
+	releaseIfNotNull(device);
 	releaseIfNotNull(depthStencilView);
 	releaseIfNotNull(depthStencilBuffer);
 	return true;
@@ -186,4 +213,5 @@ Broker::~Broker() {
 	deleteIfNotNull(pass);
 	deleteIfNotNull(environment);
 	deleteIfNotNull(camera);
+	deleteIfNotNull(debugPass);
 }

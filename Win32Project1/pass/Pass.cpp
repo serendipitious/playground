@@ -1,7 +1,7 @@
 #include "Pass.h"
 
-Pass::Pass(ID3D11Device *device, ID3D11DeviceContext *context, Camera *camera)
-	: device(device), context(context), camera(camera) {
+Pass::Pass(ID3D11Device *device, ID3D11DeviceContext *context, Camera *camera, RenderTarget *renderTarget)
+	: device(device), context(context), camera(camera), renderTarget(renderTarget) {
 
 }
 
@@ -63,7 +63,7 @@ Pass::~Pass() {
 }
 
 void Pass::initDraw() {
-
+	renderTarget->setRenderTarget(context);
 	vertexShader->setShader(device, context);
 	pixelShader->setShader(device, context);
 

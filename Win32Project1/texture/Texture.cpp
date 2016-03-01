@@ -4,6 +4,9 @@
 Texture::Texture(char* filename, int startSlot) : filename(filename), startSlot(startSlot) {
 }
 
+Texture::Texture(ID3D11ShaderResourceView* texture, int startSlot) : texture(texture), startSlot(startSlot) {
+}
+
 void Texture::setTexture(ID3D11Device *device, ID3D11DeviceContext *context) {
 	context->PSSetShaderResources(startSlot, 1, &texture);
 	context->PSSetSamplers(startSlot, 1, &textureSamplerState);

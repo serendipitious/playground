@@ -6,13 +6,16 @@
 #include <xnamath.h>
 #include "Camera.h"
 #include "Model.h"
-#include "Pass.h"
+#include "pass/Pass.h"
+#include "pass/DebugPass.h"
 #include "global.h"
 #include "Shader.h"
 #include "Constant.h"
 #include "texture/Texture.h"
 #include "ModelTools.h"
 #include "texture/SkyBox.h"
+#include "RenderTarget.h"
+#include "texture/RenderTargetTexture.h"
 
 class Broker
 {
@@ -35,13 +38,17 @@ private:
 
 	// d3d apps
 	IDXGISwapChain* swapChain;
-	ID3D11Device* d3d11Device;
-	ID3D11DeviceContext* d3d11DevCon;
+	ID3D11Device* device;
+	ID3D11DeviceContext* context;
 	ID3D11RenderTargetView* renderTargetView;
 
 	// new version classes
 	Pass *pass;
 	Pass *environment;
+	Pass *debugPass;
+
+	RenderTarget *defaultRenderTarget;
+	RenderTarget *debugRenderTarget;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
@@ -58,5 +65,9 @@ private:
 
 	void initScene(int widht, int height);
 	void initLight();
+
+	void initPass();
+	void initEnvironment();
+	void initDebugPass();
 };
 

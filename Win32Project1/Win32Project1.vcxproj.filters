@@ -21,9 +21,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Pass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,15 +39,24 @@
     <ClCompile Include="broker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pass\Pass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pass\DebugPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture\RenderTargetTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Pass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
@@ -77,6 +83,18 @@
     <ClInclude Include="Broker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pass\Pass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pass\DebugPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture\RenderTargetTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32Project1.rc">
@@ -88,6 +106,8 @@
     <FxCompile Include="shaders\pass\VertexShader.hlsl" />
     <FxCompile Include="shaders\environment\PixelShader.hlsl" />
     <FxCompile Include="shaders\environment\VertexShader.hlsl" />
+    <FxCompile Include="shaders\debugPass\VertexShader.hlsl" />
+    <FxCompile Include="shaders\debugPass\PixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\braynzar.jpg">
