@@ -33,6 +33,8 @@ public:
 	void setRasterizerState(D3D11_RASTERIZER_DESC desc);
 	void setDepthStencilState(D3D11_DEPTH_STENCIL_DESC desc);
 
+	void setRenderTarget(RenderTarget *renderTarget);
+
 private:
 	ID3D11Device* device;
 	ID3D11DeviceContext* context;

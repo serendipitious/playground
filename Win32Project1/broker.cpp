@@ -27,9 +27,9 @@ void Broker::initPass() {
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
-	cbPerFra->light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
-	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
+	cbPerFra->light.diffuse = 0.6;
+	cbPerFra->light.ambient = XMFLOAT4(0.3, 0.3, 0.3, 0.0);
+	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, 1.0);
 
 	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
 	pass->addConstantForPS(light);
@@ -50,9 +50,9 @@ void Broker::initGround() {
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
-	cbPerFra->light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
-	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
+	cbPerFra->light.diffuse = 0.3;
+	cbPerFra->light.ambient = XMFLOAT4(0.1, 0.1, 0.1, 0.0);
+	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, 1.0);
 
 	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
 	ground->addConstantForPS(light);
@@ -96,7 +96,6 @@ void Broker::initDebugPass() {
 	debugPass->initViewport(width, height);
 	debugPass->loadShaders("shaders\\debugPass\\VertexShader.hlsl", "shaders\\debugPass\\PixelShader.hlsl");
 
-	//Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
 	Texture *texture = new RenderTargetTexture(debugRenderTarget->getTexture(), 0);
 	texture->loadTexture(device, context);
 	debugPass->addTexture(texture);
@@ -162,7 +161,7 @@ void Broker::updateScene() {
 }
 
 void Broker::initCamera() {
-	camera = new Camera(XMFLOAT4(0, 3, -8, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
+	camera = new Camera(XMFLOAT4(1, 3, 5, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
 }
 
 void Broker::drawScene() {
@@ -179,7 +178,12 @@ void Broker::drawScene() {
 	environment->addConstantForVS(new Constant(m, sizeof(matrixBuffer), 1));
 	environment->draw();
 
+	pass->setRenderTarget(debugRenderTarget);
 	pass->draw();
+
+	pass->setRenderTarget(defaultRenderTarget);
+	pass->draw();
+
 	ground->draw();
 
 	debugPass->draw();
@@ -227,4 +231,5 @@ Broker::~Broker() {
 	deleteIfNotNull(environment);
 	deleteIfNotNull(camera);
 	deleteIfNotNull(debugPass);
+	deleteIfNotNull(ground);
 }

@@ -101,7 +101,8 @@ void Pass::draw() {
 
 	cbPerObject cbPerObj;
 	cbPerObj.WVP = WVP;
-	cbPerObj.normalTransform = XMMatrixTranspose(WVP);
+	cbPerObj.normalTransform = world;
+	cbPerObj.eyePosition = camera->position;
 	Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
 	wvp->setConstantForVS(device, context);
 
@@ -115,4 +116,8 @@ void Pass::setRasterizerState(D3D11_RASTERIZER_DESC desc) {
 
 void Pass::setDepthStencilState(D3D11_DEPTH_STENCIL_DESC desc) {
 	device->CreateDepthStencilState(&desc, &depthStencilState);
+}
+
+void Pass::setRenderTarget(RenderTarget *renderTarget) {
+	this->renderTarget = renderTarget;
 }

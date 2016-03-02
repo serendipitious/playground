@@ -9,13 +9,13 @@
 struct cbPerObject {
 	XMMATRIX WVP;
 	XMMATRIX normalTransform;
+	XMFLOAT4 eyePosition;
 };
 
 struct Light {
 	XMFLOAT3 dir;
-	float pad;
+	float diffuse;
 	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
 };
 
 struct cbPerFrame {

@@ -54,10 +54,10 @@ static Model* createCube() {
 
 static Model* createPlane() {
 	Vertex *v = new Vertex[4];
-	v[0] = Vertex(-10.0f, 0.0f, -10.0f, 0, 0, 0, 0, 1);
-	v[1] = Vertex(-10.0f, 0.0f, 10.0f, 1, 0, 0, 0, 1);
-	v[2] = Vertex(10.0f, 0.0f, 10.0f, 1, 1, 0, 0, 1);
-	v[3] = Vertex(10.0f, 0.0f, -10.0f, 0, 1, 0, 0, 1);
+	v[0] = Vertex(-10.0f, 0.0f, -10.0f, 0, 0, 0, 1, 0);
+	v[1] = Vertex(-10.0f, 0.0f, 10.0f, 1, 0, 0, 1, 0);
+	v[2] = Vertex(10.0f, 0.0f, 10.0f, 1, 1, 0, 1, 0);
+	v[3] = Vertex(10.0f, 0.0f, -10.0f, 0, 1, 0, 1, 0);
 
 	DWORD *i = new DWORD[6];
 	i[0] = 0; i[1] = 1; i[2] = 2;
