@@ -7,9 +7,8 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 
 	initPass();
 	initEnvironment();
+	initGround();
 	initDebugPass();
-
-	initScene(width, height);
 }
 
 void Broker::initPass() {
@@ -25,6 +24,39 @@ void Broker::initPass() {
 	Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
 	texture->loadTexture(device, context);
 	pass->addTexture(texture);
+
+	// light
+	cbPerFrame *cbPerFra = new cbPerFrame();
+	cbPerFra->light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
+	cbPerFra->light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
+	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
+
+	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
+	pass->addConstantForPS(light);
+	pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+}
+
+void Broker::initGround() {
+	ground = new Pass(device, context, camera, defaultRenderTarget);
+
+	ground->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
+
+	// TODO refine init view port logic
+	ground->initViewport(width, height);
+
+	Texture *texture = new Texture("resources\\grass.jpg", 0);
+	texture->loadTexture(device, context);
+	ground->addTexture(texture);
+
+	// light
+	cbPerFrame *cbPerFra = new cbPerFrame();
+	cbPerFra->light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
+	cbPerFra->light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
+	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
+
+	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
+	ground->addConstantForPS(light);
+	ground->model = createPlane();
 }
 
 void Broker::initEnvironment() {
@@ -55,6 +87,7 @@ void Broker::initEnvironment() {
 	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	environment->setDepthStencilState(dssDesc);
 
+	environment->model = CreateSphere(10, 10);
 }
 
 void Broker::initDebugPass() {
@@ -128,29 +161,8 @@ void Broker::updateScene() {
 	
 }
 
-void Broker::initScene(int width, int height) {
-	initModel();
-	initLight();
-}
-
-void Broker::initLight() {
-	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light.ambient = XMFLOAT4(0.6, 0.6, 0.6, 0.0);
-	cbPerFra->light.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 0.0);
-	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, -1.0);
-
-	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
-	pass->addConstantForPS(light);
-}
-
 void Broker::initCamera() {
 	camera = new Camera(XMFLOAT4(0, 3, -8, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
-}
-
-void Broker::initModel() {
-	//pass->model = createCube();
-	pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
-	environment->model = CreateSphere(10, 10);
 }
 
 void Broker::drawScene() {
@@ -168,6 +180,7 @@ void Broker::drawScene() {
 	environment->draw();
 
 	pass->draw();
+	ground->draw();
 
 	debugPass->draw();
 

@@ -114,5 +114,8 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="resources\skymap.dds" />
+    <Image Include="resources\grass.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -44,6 +44,7 @@ private:
 
 	// new version classes
 	Pass *pass;
+	Pass *ground;
 	Pass *environment;
 	Pass *debugPass;
 
@@ -60,13 +61,10 @@ private:
 
 	bool initializeDirect3d11App(HWND outputWindow, int width, int height);
 	bool releaseDirect3d11App();
-	void initModel();
 	void initCamera();
 
-	void initScene(int widht, int height);
-	void initLight();
-
 	void initPass();
+	void initGround();
 	void initEnvironment();
 	void initDebugPass();
 };
