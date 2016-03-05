@@ -47,12 +47,15 @@ private:
 	Pass *ground;
 	Pass *environment;
 	Pass *debugPass;
+	Pass *depthPass;
 
 	RenderTarget *defaultRenderTarget;
 	RenderTarget *debugRenderTarget;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
+
+	Light light;
 
 	int width;
 	int height;
@@ -64,6 +67,7 @@ private:
 	void initCamera();
 
 	void initPass();
+	void initDepthPass();
 	void initGround();
 	void initEnvironment();
 	void initDebugPass();

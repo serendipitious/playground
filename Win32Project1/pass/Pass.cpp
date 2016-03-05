@@ -2,7 +2,8 @@
 
 Pass::Pass(ID3D11Device *device, ID3D11DeviceContext *context, Camera *camera, RenderTarget *renderTarget)
 	: device(device), context(context), camera(camera), renderTarget(renderTarget) {
-
+	vertexShader = NULL;
+	pixelShader = NULL;
 }
 
 void Pass::initViewport(int width, int height) {
@@ -21,6 +22,8 @@ void Pass::initViewport(int width, int height) {
 }
 
 void Pass::loadShaders(char* vsFilename, char* psFilename) {
+	deleteIfNotNull(vertexShader);
+	deleteIfNotNull(pixelShader);
 	vertexShader = new Shader(vsFilename, VERTEX_SHADER);
 	pixelShader = new Shader(psFilename, PIXEL_SHADER);
 
@@ -92,19 +95,21 @@ void Pass::initDraw() {
 
 void Pass::draw() {
 	initDraw();
+	
+	if (useDefaultWVP) {
+		XMFLOAT4X4 view = camera->getViewMatrix();
+		XMMATRIX camView = XMLoadFloat4x4(&view);
+		XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
+		XMMATRIX world = XMMatrixIdentity();
+		XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
 
-	XMFLOAT4X4 view = camera->getViewMatrix();
-	XMMATRIX camView = XMLoadFloat4x4(&view);
-	XMMATRIX camProjection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float) width / height, 1.0f, 1000.0f);
-	XMMATRIX world = XMMatrixIdentity();
-	XMMATRIX WVP = XMMatrixTranspose(world * camView * camProjection);
-
-	cbPerObject cbPerObj;
-	cbPerObj.WVP = WVP;
-	cbPerObj.normalTransform = world;
-	cbPerObj.eyePosition = camera->position;
-	Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
-	wvp->setConstantForVS(device, context);
+		cbPerObject cbPerObj;
+		cbPerObj.WVP = WVP;
+		cbPerObj.normalTransform = world;
+		cbPerObj.eyePosition = camera->position;
+		Constant *wvp = new Constant(&cbPerObj, sizeof(cbPerObj), 0);
+		wvp->setConstantForVS(device, context);
+	}
 
 	int indexSize = model->indexSize;
 	context->DrawIndexed(indexSize, 0, 0);
@@ -120,4 +125,8 @@ void Pass::setDepthStencilState(D3D11_DEPTH_STENCIL_DESC desc) {
 
 void Pass::setRenderTarget(RenderTarget *renderTarget) {
 	this->renderTarget = renderTarget;
+}
+
+void Pass::setUseDefaultWVP(BOOL useDefault) {
+	this->useDefaultWVP = useDefault;
 }

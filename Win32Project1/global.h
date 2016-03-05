@@ -13,7 +13,7 @@ struct cbPerObject {
 };
 
 struct Light {
-	XMFLOAT3 dir;
+	XMFLOAT3 position;
 	float diffuse;
 	XMFLOAT4 ambient;
 };
@@ -24,6 +24,12 @@ struct cbPerFrame {
 
 struct matrixBuffer {
 	XMMATRIX matrix;
+};
+
+struct depthMapBuffer {
+	XMMATRIX lightView;
+	XMMATRIX lightProject;
+	XMFLOAT4 lightPosition;
 };
 
 void static validateResult(HRESULT result, char* errorMessage) {

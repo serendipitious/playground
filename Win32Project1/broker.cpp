@@ -3,19 +3,21 @@
 Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(height) {
 	initializeDirect3d11App(outputWindow, width, height);
 
+	light.diffuse = 0.6;
+	light.ambient = XMFLOAT4(0.5, 0.5, 0.5, 0.0);
+	light.position = XMFLOAT3(1.0, 8.0, 0.0);
+
 	initCamera();
 
 	initPass();
+	initDepthPass();
 	initEnvironment();
 	initGround();
 	initDebugPass();
 }
 
 void Broker::initPass() {
-	debugRenderTarget = new RenderTarget();
-	debugRenderTarget->init(device, width, height);
-	debugRenderTarget->setAutoClean(true);
-	pass = new Pass(device, context, camera, debugRenderTarget);
+	pass = new Pass(device, context, camera, defaultRenderTarget);
 	pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
 
 	// TODO refine init view port logic
@@ -27,13 +29,37 @@ void Broker::initPass() {
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light.diffuse = 0.6;
-	cbPerFra->light.ambient = XMFLOAT4(0.3, 0.3, 0.3, 0.0);
-	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, 1.0);
+	cbPerFra->light = light;
 
 	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
 	pass->addConstantForPS(light);
 	pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+}
+
+void Broker::initDepthPass() {
+	depthPass = new Pass(device, context, camera, debugRenderTarget);
+	depthPass->setUseDefaultWVP(FALSE);
+	depthPass->loadShaders("shaders\\depthMap\\VertexShader.hlsl", "shaders\\depthMap\\PixelShader.hlsl");
+	depthPass->initViewport(width, height);
+
+	// light
+	cbPerFrame *cbPerFra = new cbPerFrame();
+	cbPerFra->light = light;
+
+	depthPass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+
+	depthMapBuffer *buffer = new depthMapBuffer();
+	buffer->lightPosition = XMFLOAT4(light.position.x, light.position.y, light.position.z, 1);
+	//buffer->lightProject = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
+	buffer->lightProject = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
+	XMVECTOR posVec = XMLoadFloat4(&(buffer->lightPosition));
+	XMVECTOR target = XMVectorSet(0, 0, 0, 0);
+	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+
+	buffer->lightView = XMMatrixLookAtLH(posVec, target, up);
+	Constant *depthBufferConstant = new Constant(buffer, sizeof(depthMapBuffer), 0);
+	depthPass->addConstantForVS(depthBufferConstant);
+
 }
 
 void Broker::initGround() {
@@ -50,9 +76,7 @@ void Broker::initGround() {
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light.diffuse = 0.3;
-	cbPerFra->light.ambient = XMFLOAT4(0.1, 0.1, 0.1, 0.0);
-	cbPerFra->light.dir = XMFLOAT3(-1.0, -1.0, 1.0);
+	cbPerFra->light = light;
 
 	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
 	ground->addConstantForPS(light);
@@ -153,6 +177,10 @@ bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
 
 	defaultRenderTarget = new RenderTarget(renderTargetView, NULL, depthStencilView);
 
+	debugRenderTarget = new RenderTarget();
+	debugRenderTarget->init(device, width, height);
+	debugRenderTarget->setAutoClean(true);
+
 	return true;
 }
 
@@ -161,7 +189,8 @@ void Broker::updateScene() {
 }
 
 void Broker::initCamera() {
-	camera = new Camera(XMFLOAT4(1, 3, 5, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
+	//camera = new Camera(XMFLOAT4(1, 3, 5, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
+	camera = new Camera(XMFLOAT4(1, 8, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
 }
 
 void Broker::drawScene() {
@@ -178,11 +207,10 @@ void Broker::drawScene() {
 	environment->addConstantForVS(new Constant(m, sizeof(matrixBuffer), 1));
 	environment->draw();
 
-	pass->setRenderTarget(debugRenderTarget);
-	pass->draw();
-
 	pass->setRenderTarget(defaultRenderTarget);
 	pass->draw();
+	
+	depthPass->draw();
 
 	ground->draw();
 

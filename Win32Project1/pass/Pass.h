@@ -21,6 +21,7 @@ public:
 	Model *model;
 	virtual void draw();
 
+	void setUseDefaultWVP(BOOL useDefault);
 	void IASetModel();
 	void loadShaders(char* vsFilename, char* psFilename);
 	void initViewport(int width, int height);
@@ -51,8 +52,10 @@ private:
 
 	ID3D11RasterizerState *rasterizerState = NULL;
 	ID3D11DepthStencilState *depthStencilState = NULL;
+	BOOL useDefaultWVP = TRUE;
 
 	void initViewport();
+
 
 protected:
 	void initDraw();

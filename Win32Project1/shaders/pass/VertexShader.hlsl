@@ -3,6 +3,7 @@ struct VS_OUTPUT {
 	float2 texcoord : TEXCOORD;
 	float3 normal : NORMAL;
 	float3 eyeDir : DIRECTION;
+	float3 worldPosition : POSITION;
 };
 
 cbuffer cbPerObject
@@ -19,5 +20,6 @@ VS_OUTPUT main(float4 inPos : POSITION, float2 inTexCoord : TEXCOORD, float3 inN
 	output.normal = mul(inNormal, normalTransform);
 	// TODO transform eyePosition?
 	output.eyeDir = eyePosition - inPos;
+	output.worldPosition = inPos;
 	return output;
 }
