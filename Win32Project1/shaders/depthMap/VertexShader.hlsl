@@ -11,9 +11,10 @@ cbuffer cbPerObject {
 
 VS_OUTPUT main(float4 inPos : POSITION, float2 inTexCoord : TEXCOORD, float3 inNormal : NORMAL) {
 	VS_OUTPUT output;
-	inPos = mul(lightView, inPos);
-	inPos = mul(lightProject, inPos);
+	inPos.w = 1.0f;
+	inPos = mul(inPos, lightView);
+	inPos = mul(inPos, lightProject);
 	output.pos = inPos;
-	output.lightVec = (lightPos - inPos) * 0.01;
+	output.lightVec = inPos;
 	return output;
 }

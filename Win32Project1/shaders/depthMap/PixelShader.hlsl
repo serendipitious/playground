@@ -5,5 +5,6 @@ struct VS_OUTPUT {
 
 
 float4 main(VS_OUTPUT input) : SV_TARGET {
-	return length(input.lightVec);
+	float depthValue = input.lightVec.z / input.lightVec.w;
+	return float4(depthValue, depthValue, depthValue, 1.0f);
 }

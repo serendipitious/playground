@@ -110,6 +110,8 @@
     <FxCompile Include="shaders\debugPass\PixelShader.hlsl" />
     <FxCompile Include="shaders\depthMap\PixelShader.hlsl" />
     <FxCompile Include="shaders\depthMap\VertexShader.hlsl" />
+    <FxCompile Include="shaders\ground\PixelShader.hlsl" />
+    <FxCompile Include="shaders\ground\VertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\braynzar.jpg">

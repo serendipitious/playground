@@ -5,7 +5,7 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 
 	light.diffuse = 0.6;
 	light.ambient = XMFLOAT4(0.5, 0.5, 0.5, 0.0);
-	light.position = XMFLOAT3(1.0, 8.0, 0.0);
+	light.position = XMFLOAT3(3.0, 7.0, 10.0);
 
 	initCamera();
 
@@ -42,21 +42,18 @@ void Broker::initDepthPass() {
 	depthPass->loadShaders("shaders\\depthMap\\VertexShader.hlsl", "shaders\\depthMap\\PixelShader.hlsl");
 	depthPass->initViewport(width, height);
 
-	// light
-	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light = light;
-
 	depthPass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
 
+	// light
+	// TODO move this code to a light class
 	depthMapBuffer *buffer = new depthMapBuffer();
 	buffer->lightPosition = XMFLOAT4(light.position.x, light.position.y, light.position.z, 1);
-	//buffer->lightProject = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
-	buffer->lightProject = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
+	buffer->lightProject = XMMatrixTranspose(XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f));
 	XMVECTOR posVec = XMLoadFloat4(&(buffer->lightPosition));
 	XMVECTOR target = XMVectorSet(0, 0, 0, 0);
 	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
 
-	buffer->lightView = XMMatrixLookAtLH(posVec, target, up);
+	buffer->lightView = XMMatrixTranspose(XMMatrixLookAtLH(posVec, target, up));
 	Constant *depthBufferConstant = new Constant(buffer, sizeof(depthMapBuffer), 0);
 	depthPass->addConstantForVS(depthBufferConstant);
 
@@ -65,7 +62,7 @@ void Broker::initDepthPass() {
 void Broker::initGround() {
 	ground = new Pass(device, context, camera, defaultRenderTarget);
 
-	ground->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
+	ground->loadShaders("shaders\\ground\\VertexShader.hlsl", "shaders\\ground\\PixelShader.hlsl");
 
 	// TODO refine init view port logic
 	ground->initViewport(width, height);
@@ -74,13 +71,29 @@ void Broker::initGround() {
 	texture->loadTexture(device, context);
 	ground->addTexture(texture);
 
+	Texture *depthTexture = new RenderTargetTexture(debugRenderTarget->getTexture(), 1);
+	depthTexture->loadTexture(device, context);
+	ground->addTexture(depthTexture);
+
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
 	cbPerFra->light = light;
 
-	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
-	ground->addConstantForPS(light);
+	Constant* lightConstant = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
+	ground->addConstantForPS(lightConstant);
 	ground->model = createPlane();
+
+	// light view/project matrix
+	depthMapBuffer *buffer = new depthMapBuffer();
+	buffer->lightPosition = XMFLOAT4(light.position.x, light.position.y, light.position.z, 1);
+	buffer->lightProject = XMMatrixTranspose(XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f));
+	XMVECTOR posVec = XMLoadFloat4(&(buffer->lightPosition));
+	XMVECTOR target = XMVectorSet(0, 0, 0, 0);
+	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+
+	buffer->lightView = XMMatrixTranspose(XMMatrixLookAtLH(posVec, target, up));
+	Constant *depthBufferConstant = new Constant(buffer, sizeof(depthMapBuffer), 1);
+	depthPass->addConstantForVS(depthBufferConstant);
 }
 
 void Broker::initEnvironment() {
@@ -189,8 +202,7 @@ void Broker::updateScene() {
 }
 
 void Broker::initCamera() {
-	//camera = new Camera(XMFLOAT4(1, 3, 5, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
-	camera = new Camera(XMFLOAT4(1, 8, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
+	camera = new Camera(XMFLOAT4(5, 5, 5, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
 }
 
 void Broker::drawScene() {

@@ -186,7 +186,7 @@ static Model* loadObjModel(char *objFilename) {
 		if (strcmp(flag, "v") == 0) {
 			float x, y, z;
 			fin >> x >> y >> z;
-			vertices.push_back(Vertex(x, y, z, 0, 0, 0, 0, 0));
+			vertices.push_back(Vertex(x, y + 1, z, 0, 0, 0, 0, 0));
 		}
 		else if (strcmp(flag, "vt") == 0) {
 			float u, v;
