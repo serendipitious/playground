@@ -5,9 +5,21 @@ struct Vertex {
 	XMFLOAT3 pos;
 	XMFLOAT2 texcoord;
 	XMFLOAT3 normal;
+	XMFLOAT3 tangent;
+	XMFLOAT3 binormal;
 	Vertex(){}
 	Vertex(float x, float y, float z, float u, float v, float nx, float ny, float nz)
 		: pos(x, y, z), texcoord(u, v), normal(nx, ny, nz) {}
+
+	Vertex& operator- (const Vertex& v) {
+		Vertex r = *this;
+		r.pos.x -= v.pos.x;
+		r.pos.y -= v.pos.y;
+		r.pos.z -= v.pos.z;
+		r.texcoord.x -= v.texcoord.x;
+		r.texcoord.y -= v.texcoord.y;
+		return r;
+	}
 };
 
 

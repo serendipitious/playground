@@ -18,14 +18,20 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 
 void Broker::initPass() {
 	pass = new Pass(device, context, camera, defaultRenderTarget);
-	pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
+	//pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
+	pass->loadShaders("shaders\\normalMap\\VertexShader.hlsl", "shaders\\normalMap\\PixelShader.hlsl");
 
 	// TODO refine init view port logic
 	pass->initViewport(width, height);
 
-	Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
+	//Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
+	Texture *texture = new Texture("resources\\brick.jpg", 0);
 	texture->loadTexture(device, context);
 	pass->addTexture(texture);
+
+	Texture *texture1 = new Texture("resources\\brick_bump.jpg", 1);
+	texture1->loadTexture(device, context);
+	pass->addTexture(texture1);
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
@@ -33,7 +39,8 @@ void Broker::initPass() {
 
 	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
 	pass->addConstantForPS(light);
-	pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+	//pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+	pass->model = createCube();
 }
 
 void Broker::initDepthPass() {
@@ -42,7 +49,8 @@ void Broker::initDepthPass() {
 	depthPass->loadShaders("shaders\\depthMap\\VertexShader.hlsl", "shaders\\depthMap\\PixelShader.hlsl");
 	depthPass->initViewport(width, height);
 
-	depthPass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+	//depthPass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
+	depthPass->model = createCube();
 
 	// light
 	// TODO move this code to a light class

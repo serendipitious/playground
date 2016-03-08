@@ -7,6 +7,80 @@
 #include <sstream>
 #include <string>
 
+
+static void caculateTangentBinormal(Model* model) {
+	for (int i = 0; i < model->indexSize; i += 3) {
+		int i1 = model->indices[i];
+		int i2 = model->indices[i + 1];
+		int i3 = model->indices[i + 2];
+
+		Vertex& v1 = model->data[i1];
+		Vertex& v2 = model->data[i2];
+		Vertex& v3 = model->data[i3];
+
+		float vector1[3], vector2[3];
+		float tuVector[2], tvVector[2];
+		float den;
+		float length;
+		XMFLOAT3 tangent, binormal;
+
+
+		// Calculate the two vectors for this face.
+		vector1[0] = v2.pos.x - v1.pos.x;
+		vector1[1] = v2.pos.y - v1.pos.y;
+		vector1[2] = v2.pos.z - v1.pos.z;
+
+		vector2[0] = v3.pos.x - v1.pos.x;
+		vector2[1] = v3.pos.y - v1.pos.y;
+		vector2[2] = v3.pos.z - v1.pos.z;
+
+		// Calculate the tu and tv texture space vectors.
+		tuVector[0] = v2.texcoord.x - v1.texcoord.x;
+		tvVector[0] = v2.texcoord.y - v1.texcoord.y;
+
+		tuVector[1] = v3.texcoord.x - v1.texcoord.x;
+		tvVector[1] = v3.texcoord.y - v1.texcoord.y;
+
+		// Calculate the denominator of the tangent/binormal equation.
+		den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+		// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+		tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+		tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+		tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+		binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
+		binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
+		binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+		// Calculate the length of this normal.
+		length = sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
+
+		// Normalize the normal and then store it
+		tangent.x = tangent.x / length;
+		tangent.y = tangent.y / length;
+		tangent.z = tangent.z / length;
+
+		// Calculate the length of this normal.
+		length = sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
+
+		// Normalize the normal and then store it
+		binormal.x = binormal.x / length;
+		binormal.y = binormal.y / length;
+		binormal.z = binormal.z / length;
+
+		v1.tangent = tangent;
+		v2.tangent = tangent;
+		v3.tangent = tangent;
+
+		v1.binormal = binormal;
+		v2.binormal = binormal;
+		v3.binormal = binormal;
+	}
+}
+
+
+
 static Model* createCube() {
 	int vertexSize = 24;
 	Vertex *v = new Vertex[24];
@@ -49,15 +123,17 @@ static Model* createCube() {
 	idx[24] = 16; idx[25] = 17; idx[26] = 18; idx[27] = 16; idx[28] = 18; idx[29] = 19;
 	idx[30] = 20; idx[31] = 21; idx[32] = 22; idx[33] = 20; idx[34] = 22; idx[35] = 23;
 
-	return new Model(v, vertexSize, idx, indexSize);
+	Model * model = new Model(v, vertexSize, idx, indexSize);
+	caculateTangentBinormal(model);
+	return model;
 }
 
 static Model* createPlane() {
 	Vertex *v = new Vertex[4];
-	v[0] = Vertex(-10.0f, 0.0f, -10.0f, 0, 0, 0, 1, 0);
-	v[1] = Vertex(-10.0f, 0.0f, 10.0f, 1, 0, 0, 1, 0);
-	v[2] = Vertex(10.0f, 0.0f, 10.0f, 1, 1, 0, 1, 0);
-	v[3] = Vertex(10.0f, 0.0f, -10.0f, 0, 1, 0, 1, 0);
+	v[0] = Vertex(-10.0f, -1.0f, -10.0f, 0, 0, 0, 1, 0);
+	v[1] = Vertex(-10.0f, -1.0f, 10.0f, 1, 0, 0, 1, 0);
+	v[2] = Vertex(10.0f, -1.0f, 10.0f, 1, 1, 0, 1, 0);
+	v[3] = Vertex(10.0f, -1.0f, -10.0f, 0, 1, 0, 1, 0);
 
 	DWORD *i = new DWORD[6];
 	i[0] = 0; i[1] = 1; i[2] = 2;
