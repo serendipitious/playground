@@ -1,6 +1,6 @@
-#include "Broker.h"
+#include "Graphics.h"
 
-Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(height) {
+Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), height(height) {
 	initializeDirect3d11App(outputWindow, width, height);
 
 	light.diffuse = 0.6;
@@ -16,7 +16,7 @@ Broker::Broker(HWND outputWindow, int width, int height) : width(width), height(
 	initDebugPass();
 }
 
-void Broker::initPass() {
+void Graphics::initPass() {
 	pass = new Pass(device, context, camera, defaultRenderTarget);
 	//pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
 	pass->loadShaders("shaders\\normalMap\\VertexShader.hlsl", "shaders\\normalMap\\PixelShader.hlsl");
@@ -43,7 +43,7 @@ void Broker::initPass() {
 	pass->model = createCube();
 }
 
-void Broker::initDepthPass() {
+void Graphics::initDepthPass() {
 	depthPass = new Pass(device, context, camera, debugRenderTarget);
 	depthPass->setUseDefaultWVP(FALSE);
 	depthPass->loadShaders("shaders\\depthMap\\VertexShader.hlsl", "shaders\\depthMap\\PixelShader.hlsl");
@@ -67,7 +67,7 @@ void Broker::initDepthPass() {
 
 }
 
-void Broker::initGround() {
+void Graphics::initGround() {
 	ground = new Pass(device, context, camera, defaultRenderTarget);
 
 	ground->loadShaders("shaders\\ground\\VertexShader.hlsl", "shaders\\ground\\PixelShader.hlsl");
@@ -104,7 +104,7 @@ void Broker::initGround() {
 	depthPass->addConstantForVS(depthBufferConstant);
 }
 
-void Broker::initEnvironment() {
+void Graphics::initEnvironment() {
 
 	// environment pass
 	environment = new Pass(device, context, camera, defaultRenderTarget);
@@ -135,7 +135,7 @@ void Broker::initEnvironment() {
 	environment->model = CreateSphere(10, 10);
 }
 
-void Broker::initDebugPass() {
+void Graphics::initDebugPass() {
 	debugPass = new DebugPass(device, context, camera, defaultRenderTarget);
 
 	debugPass->initViewport(width, height);
@@ -146,7 +146,7 @@ void Broker::initDebugPass() {
 	debugPass->addTexture(texture);
 }
 
-bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
+bool Graphics::initializeDirect3d11App(HWND outputWindow, int width, int height) {
 	DXGI_MODE_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(DXGI_MODE_DESC));
 	bufferDesc.Width = width;
@@ -205,15 +205,15 @@ bool Broker::initializeDirect3d11App(HWND outputWindow, int width, int height) {
 	return true;
 }
 
-void Broker::updateScene() {
+void Graphics::updateScene() {
 	
 }
 
-void Broker::initCamera() {
+void Graphics::initCamera() {
 	camera = new Camera(XMFLOAT4(5, 5, 5, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 1, 0, 0));
 }
 
-void Broker::drawScene() {
+void Graphics::drawScene() {
 	D3DXCOLOR bgColor(0.1f, 0.1f, 0.3f, 0.0f);
 	context->ClearRenderTargetView(renderTargetView, bgColor);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -240,7 +240,7 @@ void Broker::drawScene() {
 	swapChain->Present(0, 0);
 }
 
-bool Broker::releaseDirect3d11App() {
+bool Graphics::releaseDirect3d11App() {
 	releaseIfNotNull(swapChain);
 	releaseIfNotNull(context);
 	releaseIfNotNull(device);
@@ -249,31 +249,31 @@ bool Broker::releaseDirect3d11App() {
 	return true;
 }
 
-void Broker::rotateLeft() {
+void Graphics::rotateLeft() {
 	camera->rotateLeft();
 }
 
-void Broker::rotateRight() {
+void Graphics::rotateRight() {
 	camera->rotateRight();
 }
 
-void Broker::rotateUp() {
+void Graphics::rotateUp() {
 	camera->rotateUp();
 }
 
-void Broker::rotateDown() {
+void Graphics::rotateDown() {
 	camera->rotateDown();
 }
 
-void Broker::moveForward() {
+void Graphics::moveForward() {
 	camera->moveForward();
 }
 
-void Broker::moveBackward() {
+void Graphics::moveBackward() {
 	camera->moveBackward();
 }
 
-Broker::~Broker() {
+Graphics::~Graphics() {
 	releaseDirect3d11App();
 	deleteIfNotNull(pass);
 	deleteIfNotNull(environment);

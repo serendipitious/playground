@@ -82,7 +82,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="broker.cpp" />
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="pass\DebugPass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -96,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Broker.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="pass\DebugPass.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="Model.h" />

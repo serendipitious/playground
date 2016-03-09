@@ -8,17 +8,17 @@
 #include <d3dx11.h>
 #include <d3dx10.h>
 #include <xnamath.h>
-#include "Broker.h"
+#include "Graphics.h"
 
 LPCTSTR WndClassName = "firstwindow";
 HWND hwnd = NULL;
 
-const int Width = 768;
-const int Height = 640;
-Broker  *broker;
+const int Width = 1024;
+const int Height = 768;
+Graphics *graphics;
 
 bool InitializeWindow(HINSTANCE hInstance,int ShowWnd,int width, int height, bool windowed);
-int messageloop(Broker *);
+int messageloop(Graphics *);
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -28,8 +28,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	broker = new Broker(hwnd, Width, Height);
-	messageloop(broker);
+	graphics = new Graphics(hwnd, Width, Height);
+	messageloop(graphics);
 	return 0;
 }
 
@@ -82,7 +82,7 @@ bool InitializeWindow(HINSTANCE hInstance, int ShowWnd, int width, int height, b
 
 	return true;
 }
-int messageloop(Broker *broker) {
+int messageloop(Graphics *graphics) {
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
 	while (true) {
@@ -94,8 +94,8 @@ int messageloop(Broker *broker) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
-			broker->updateScene();
-			broker->drawScene();
+			graphics->updateScene();
+			graphics->drawScene();
 		}
 	}
 	return msg.wParam;
@@ -107,25 +107,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		switch (wParam) {
 		case VK_ESCAPE:
 			DestroyWindow(hwnd);
-			delete broker;
+			delete graphics;
 			break;
 		case VK_LEFT:
-			broker->rotateLeft();
+			graphics->rotateLeft();
 			break;
 		case VK_RIGHT:
-			broker->rotateRight();
+			graphics->rotateRight();
 			break;
 		case VK_UP:
-			broker->rotateUp();
+			graphics->rotateUp();
 			break;
 		case VK_DOWN:
-			broker->rotateDown();
+			graphics->rotateDown();
 			break;
 		case VK_SHIFT:
-			broker->moveBackward();
+			graphics->moveBackward();
 			break;
 		case VK_SPACE:
-			broker->moveForward();
+			graphics->moveForward();
 			break;
 		}
 		return 0;

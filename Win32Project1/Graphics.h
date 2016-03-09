@@ -17,11 +17,11 @@
 #include "RenderTarget.h"
 #include "texture/RenderTargetTexture.h"
 
-class Broker
+class Graphics
 {
 public:
-	Broker(HWND outputWindow, int width, int height);
-	~Broker();
+	Graphics(HWND outputWindow, int width, int height);
+	~Graphics();
 
 	void updateScene();
 	void drawScene();
