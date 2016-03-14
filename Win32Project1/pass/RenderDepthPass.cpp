@@ -18,7 +18,7 @@ void RenderDepthPass::init(Model *model, Light *light, int width, int height) {
 
 void RenderDepthPass::draw() {
 	// caculate the light matrices in real time, in case that the light has changed its position
-	this->setConstantForVS(0, calculateLightMatrices());
+	this->setConstantForVS(1, calculateLightMatrices());
 	Pass::draw();
 }
 
@@ -28,5 +28,5 @@ RenderDepthPass::~RenderDepthPass() {
 
 Constant* RenderDepthPass::calculateLightMatrices() {
 	depthMapBuffer *buffer = light->caculateLightMatrices(width, height);
-	return new Constant(buffer, sizeof(depthMapBuffer), 0);
+	return new Constant(buffer, sizeof(depthMapBuffer), 1);
 }

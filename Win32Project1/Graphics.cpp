@@ -14,12 +14,17 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 	initPass();
 	initDebugPass();
 
+	XMMATRIX trans = XMMatrixTranslation(3, 0, 0);
+	XMFLOAT4X4 transMatrix;
+	XMStoreFloat4x4(&transMatrix, trans);
+	pass->setWorldMatrix(transMatrix);
+
 	skyMapPass = new SkyMapPass(device, context, camera, defaultRenderTarget);
 	skyMapPass->init("resources\\skymap.dds", width, height);
 
-
 	renderDepthPass = new RenderDepthPass(device, context, camera, depthRenderTarget);
 	renderDepthPass->init(model, &light, width, height);
+	renderDepthPass->setWorldMatrix(transMatrix);
 
 	shadowMapPass = new ShadowMapPass(device, context, camera, defaultRenderTarget);
 	shadowMapPass->init(createPlane(), &light, "resources\\grass.jpg", depthRenderTarget->getTexture(), width, height);
@@ -29,22 +34,11 @@ void Graphics::initPass() {
 	pass = new Pass(device, context, camera, defaultRenderTarget);
 	pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
 
-	// TODO refine init view port logic
 	pass->initViewport(width, height);
 
 	Texture *texture = new Texture("resources\\brick.jpg", 0);
 	texture->loadTexture(device, context);
 	pass->addTexture(texture);
-
-	/*
-	Texture *texture1 = new Texture("resources\\brick_bump.jpg", 1);
-	texture1->loadTexture(device, context);
-	pass->addTexture(texture1);
-	*/
-
-	Texture *depthTexture = new RenderTargetTexture(depthRenderTarget->getTexture(), 1);
-	depthTexture->loadTexture(device, context);
-	pass->addTexture(depthTexture);
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
@@ -53,19 +47,8 @@ void Graphics::initPass() {
 	Constant* lightConstant = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
 	pass->addConstantForPS(lightConstant);
 
-	// light view/project matrix
-	depthMapBuffer *buffer = new depthMapBuffer();
-	buffer->lightPosition = XMFLOAT4(light.position.x, light.position.y, light.position.z, 1);
-	buffer->lightProject = XMMatrixTranspose(XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f));
-	XMVECTOR posVec = XMLoadFloat4(&(buffer->lightPosition));
-	XMVECTOR target = XMVectorSet(0, 0, 0, 0);
-	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
-
-	buffer->lightView = XMMatrixTranspose(XMMatrixLookAtLH(posVec, target, up));
-	Constant *depthBufferConstant = new Constant(buffer, sizeof(depthMapBuffer), 1);
-	pass->addConstantForVS(depthBufferConstant);
-
 	pass->model = model;
+
 }
 
 void Graphics::initDebugPass() {

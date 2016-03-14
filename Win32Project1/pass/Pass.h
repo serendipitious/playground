@@ -43,10 +43,13 @@ public:
 
 	void setRenderTarget(RenderTarget *renderTarget);
 	RenderTarget* getRenderTarget();
+	void setWorldMatrix(XMFLOAT4X4 world);
 
 private:
 	Shader *vertexShader;
 	Shader *pixelShader;
+
+	XMFLOAT4X4 world;
 
 	std::vector<Texture*> textureList = std::vector<Texture*>();
 	std::vector<Constant*> constantForVSList = std::vector<Constant*>();
