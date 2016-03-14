@@ -4,92 +4,54 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 	initializeDirect3d11App(outputWindow, width, height);
 
 	light.diffuse = 0.6;
-	light.ambient = XMFLOAT4(0.5, 0.5, 0.5, 0.0);
+	light.ambient = XMFLOAT4(0.8, 0.8, 0.8, 0.0);
 	light.position = XMFLOAT3(3.0, 7.0, 10.0);
+
+	model = loadObjModel("resources\\bunny.3dobj", 0.01);
 
 	initCamera();
 
 	initPass();
-	initDepthPass();
-	initEnvironment();
-	initGround();
 	initDebugPass();
+
+	skyMapPass = new SkyMapPass(device, context, camera, defaultRenderTarget);
+	skyMapPass->init("resources\\skymap.dds", width, height);
+
+
+	renderDepthPass = new RenderDepthPass(device, context, camera, depthRenderTarget);
+	renderDepthPass->init(model, &light, width, height);
+
+	shadowMapPass = new ShadowMapPass(device, context, camera, defaultRenderTarget);
+	shadowMapPass->init(createPlane(), &light, "resources\\grass.jpg", depthRenderTarget->getTexture(), width, height);
 }
 
 void Graphics::initPass() {
 	pass = new Pass(device, context, camera, defaultRenderTarget);
-	//pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
-	pass->loadShaders("shaders\\normalMap\\VertexShader.hlsl", "shaders\\normalMap\\PixelShader.hlsl");
+	pass->loadShaders("shaders\\pass\\VertexShader.hlsl", "shaders\\pass\\PixelShader.hlsl");
 
 	// TODO refine init view port logic
 	pass->initViewport(width, height);
 
-	//Texture *texture = new Texture("resources\\ArcticCondorGold.jpg", 0);
 	Texture *texture = new Texture("resources\\brick.jpg", 0);
 	texture->loadTexture(device, context);
 	pass->addTexture(texture);
 
+	/*
 	Texture *texture1 = new Texture("resources\\brick_bump.jpg", 1);
 	texture1->loadTexture(device, context);
 	pass->addTexture(texture1);
+	*/
 
-	// light
-	cbPerFrame *cbPerFra = new cbPerFrame();
-	cbPerFra->light = light;
-
-	Constant* light = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
-	pass->addConstantForPS(light);
-	//pass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
-	pass->model = createCube();
-}
-
-void Graphics::initDepthPass() {
-	depthPass = new Pass(device, context, camera, debugRenderTarget);
-	depthPass->setUseDefaultWVP(FALSE);
-	depthPass->loadShaders("shaders\\depthMap\\VertexShader.hlsl", "shaders\\depthMap\\PixelShader.hlsl");
-	depthPass->initViewport(width, height);
-
-	//depthPass->model = loadObjModel("resources\\ArcticCondorGold.3dobj");
-	depthPass->model = createCube();
-
-	// light
-	// TODO move this code to a light class
-	depthMapBuffer *buffer = new depthMapBuffer();
-	buffer->lightPosition = XMFLOAT4(light.position.x, light.position.y, light.position.z, 1);
-	buffer->lightProject = XMMatrixTranspose(XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f));
-	XMVECTOR posVec = XMLoadFloat4(&(buffer->lightPosition));
-	XMVECTOR target = XMVectorSet(0, 0, 0, 0);
-	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
-
-	buffer->lightView = XMMatrixTranspose(XMMatrixLookAtLH(posVec, target, up));
-	Constant *depthBufferConstant = new Constant(buffer, sizeof(depthMapBuffer), 0);
-	depthPass->addConstantForVS(depthBufferConstant);
-
-}
-
-void Graphics::initGround() {
-	ground = new Pass(device, context, camera, defaultRenderTarget);
-
-	ground->loadShaders("shaders\\ground\\VertexShader.hlsl", "shaders\\ground\\PixelShader.hlsl");
-
-	// TODO refine init view port logic
-	ground->initViewport(width, height);
-
-	Texture *texture = new Texture("resources\\grass.jpg", 0);
-	texture->loadTexture(device, context);
-	ground->addTexture(texture);
-
-	Texture *depthTexture = new RenderTargetTexture(debugRenderTarget->getTexture(), 1);
+	Texture *depthTexture = new RenderTargetTexture(depthRenderTarget->getTexture(), 1);
 	depthTexture->loadTexture(device, context);
-	ground->addTexture(depthTexture);
+	pass->addTexture(depthTexture);
 
 	// light
 	cbPerFrame *cbPerFra = new cbPerFrame();
 	cbPerFra->light = light;
 
 	Constant* lightConstant = new Constant(cbPerFra, sizeof(cbPerFrame), 0);
-	ground->addConstantForPS(lightConstant);
-	ground->model = createPlane();
+	pass->addConstantForPS(lightConstant);
 
 	// light view/project matrix
 	depthMapBuffer *buffer = new depthMapBuffer();
@@ -101,38 +63,9 @@ void Graphics::initGround() {
 
 	buffer->lightView = XMMatrixTranspose(XMMatrixLookAtLH(posVec, target, up));
 	Constant *depthBufferConstant = new Constant(buffer, sizeof(depthMapBuffer), 1);
-	depthPass->addConstantForVS(depthBufferConstant);
-}
+	pass->addConstantForVS(depthBufferConstant);
 
-void Graphics::initEnvironment() {
-
-	// environment pass
-	environment = new Pass(device, context, camera, defaultRenderTarget);
-	environment->initViewport(width, height);
-	environment->loadShaders("shaders\\environment\\VertexShader.hlsl", "shaders\\environment\\PixelShader.hlsl");
-
-	SkyBox *skyBox = new SkyBox("resources\\skymap.dds", 0);
-	skyBox->loadTexture(device, context);
-	environment->addTexture(skyBox);
-
-	// none cull mode
-	D3D11_RASTERIZER_DESC cmdesc;
-	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
-	cmdesc.FillMode = D3D11_FILL_SOLID;
-	cmdesc.CullMode = D3D11_CULL_BACK;
-	cmdesc.FrontCounterClockwise = false;
-	cmdesc.CullMode = D3D11_CULL_NONE;
-
-	environment->setRasterizerState(cmdesc);
-
-	D3D11_DEPTH_STENCIL_DESC dssDesc;
-	ZeroMemory(&dssDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	dssDesc.DepthEnable = true;
-	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	environment->setDepthStencilState(dssDesc);
-
-	environment->model = CreateSphere(10, 10);
+	pass->model = model;
 }
 
 void Graphics::initDebugPass() {
@@ -141,7 +74,7 @@ void Graphics::initDebugPass() {
 	debugPass->initViewport(width, height);
 	debugPass->loadShaders("shaders\\debugPass\\VertexShader.hlsl", "shaders\\debugPass\\PixelShader.hlsl");
 
-	Texture *texture = new RenderTargetTexture(debugRenderTarget->getTexture(), 0);
+	Texture *texture = new RenderTargetTexture(depthRenderTarget->getTexture(), 0);
 	texture->loadTexture(device, context);
 	debugPass->addTexture(texture);
 }
@@ -197,16 +130,25 @@ bool Graphics::initializeDirect3d11App(HWND outputWindow, int width, int height)
 	device->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
 
 	defaultRenderTarget = new RenderTarget(renderTargetView, NULL, depthStencilView);
+	depthRenderTarget = new RenderTarget();
+	depthRenderTarget->init(device, width, height);
+	depthRenderTarget->setAutoClean(true);
 
-	debugRenderTarget = new RenderTarget();
-	debugRenderTarget->init(device, width, height);
-	debugRenderTarget->setAutoClean(true);
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = width;
+	viewport.Height = height;
+	viewport.MaxDepth = 1.0f;
+	viewport.MinDepth = 0.0f;
+	context->RSSetViewports(1, &viewport);
 
 	return true;
 }
 
 void Graphics::updateScene() {
-	
+	skyMapPass->update();
 }
 
 void Graphics::initCamera() {
@@ -218,25 +160,17 @@ void Graphics::drawScene() {
 	context->ClearRenderTargetView(renderTargetView, bgColor);
 	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
-	// draw sky box
-	XMFLOAT4X4 identity;
-	matrixBuffer *m = new matrixBuffer;
-	m->matrix = XMMatrixTranspose(XMMatrixScaling(5.0f, 5.0f, 5.0f) * XMMatrixTranslation(camera->position.x, camera->position.y, camera->position.z));
+	skyMapPass->draw();
 
-	// todo change add to set
-	environment->addConstantForVS(new Constant(m, sizeof(matrixBuffer), 1));
-	environment->draw();
-
-	pass->setRenderTarget(defaultRenderTarget);
 	pass->draw();
 	
-	depthPass->draw();
-
-	ground->draw();
+	renderDepthPass->draw();
+	shadowMapPass->draw();
+	//ground->draw();
 
 	debugPass->draw();
 
-//Present the backbuffer to the screen
+	//Present the backbuffer to the screen
 	swapChain->Present(0, 0);
 }
 
@@ -276,8 +210,8 @@ void Graphics::moveBackward() {
 Graphics::~Graphics() {
 	releaseDirect3d11App();
 	deleteIfNotNull(pass);
-	deleteIfNotNull(environment);
 	deleteIfNotNull(camera);
 	deleteIfNotNull(debugPass);
-	deleteIfNotNull(ground);
+	deleteIfNotNull(skyMapPass);
+	deleteIfNotNull(renderDepthPass);
 }

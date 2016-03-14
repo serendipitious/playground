@@ -130,10 +130,10 @@ static Model* createCube() {
 
 static Model* createPlane() {
 	Vertex *v = new Vertex[4];
-	v[0] = Vertex(-10.0f, -1.0f, -10.0f, 0, 0, 0, 1, 0);
-	v[1] = Vertex(-10.0f, -1.0f, 10.0f, 1, 0, 0, 1, 0);
-	v[2] = Vertex(10.0f, -1.0f, 10.0f, 1, 1, 0, 1, 0);
-	v[3] = Vertex(10.0f, -1.0f, -10.0f, 0, 1, 0, 1, 0);
+	v[0] = Vertex(-15.0f, -1.0f, -15.0f, 0, 0, 0, 1, 0);
+	v[1] = Vertex(-15.0f, -1.0f, 15.0f, 1, 0, 0, 1, 0);
+	v[2] = Vertex(15.0f, -1.0f, 15.0f, 1, 1, 0, 1, 0);
+	v[3] = Vertex(15.0f, -1.0f, -15.0f, 0, 1, 0, 1, 0);
 
 	DWORD *i = new DWORD[6];
 	i[0] = 0; i[1] = 1; i[2] = 2;
@@ -239,7 +239,7 @@ static T* vectorToArray(std::vector<T> v) {
 	return arr;
 }
 
-static Model* loadObjModel(char *objFilename) {
+static Model* loadObjModel(char *objFilename, float scale) {
 	std::ifstream fin(objFilename);
 	if (!fin.is_open()) {
 		MessageBox(0, objFilename, "Error", MB_OK);
@@ -262,9 +262,12 @@ static Model* loadObjModel(char *objFilename) {
 		if (strcmp(flag, "v") == 0) {
 			float x, y, z;
 			fin >> x >> y >> z;
-			vertices.push_back(Vertex(x, y + 1, z, 0, 0, 0, 0, 0));
+			vertices.push_back(Vertex(x * scale, y * scale, z * scale, 0, 0, 0, 0, 0));
 		}
 		else if (strcmp(flag, "vt") == 0) {
+			if (vt >= vertices.size()) {
+				continue;
+			}
 			float u, v;
 			fin >> u >> v;
 			vertices[vt].texcoord = XMFLOAT2(u, v);
@@ -272,6 +275,9 @@ static Model* loadObjModel(char *objFilename) {
 		}
 		else if (strcmp(flag, "vn") == 0) {
 			float nx, ny, nz;
+			if (vn >= vertices.size()) {
+				continue;
+			}
 			fin >> nx >> ny >> nz;
 			vertices[vn].normal = XMFLOAT3(nx, ny, nz);
 			vn++;

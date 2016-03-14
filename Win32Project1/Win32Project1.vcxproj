@@ -88,7 +88,10 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="pass\Pass.cpp" />
     <ClCompile Include="Constant.cpp" />
+    <ClCompile Include="pass\RenderDepthPass.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="pass\SkyMapPass.cpp" />
+    <ClCompile Include="pass\ShadowMapPass.cpp" />
     <ClCompile Include="texture\RenderTargetTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="texture\SkyBox.cpp" />
@@ -103,7 +106,10 @@
     <ClInclude Include="ModelTools.h" />
     <ClInclude Include="pass\Pass.h" />
     <ClInclude Include="Constant.h" />
+    <ClInclude Include="pass\RenderDepthPass.h" />
     <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="pass\SkyMapPass.h" />
+    <ClInclude Include="pass\ShadowMapPass.h" />
     <ClInclude Include="texture\RenderTargetTexture.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
@@ -143,11 +149,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\ground\PixelShader.hlsl">
+    <FxCompile Include="shaders\shadowMap\PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\ground\VertexShader.hlsl">
+    <FxCompile Include="shaders\shadowMap\VertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
@@ -165,7 +171,9 @@
     <Image Include="resources\brick.jpg" />
     <Image Include="resources\brick_bump.jpg" />
     <Image Include="resources\grass.jpg" />
-    <Image Include="resources\skymap.dds" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\bunny.3dobj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

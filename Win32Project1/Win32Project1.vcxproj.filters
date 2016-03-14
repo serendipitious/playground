@@ -51,6 +51,15 @@
     <ClCompile Include="Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pass\SkyMapPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pass\RenderDepthPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pass\ShadowMapPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -95,6 +104,15 @@
     <ClInclude Include="Graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pass\SkyMapPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pass\RenderDepthPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pass\ShadowMapPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32Project1.rc">
@@ -110,16 +128,15 @@
     <FxCompile Include="shaders\debugPass\PixelShader.hlsl" />
     <FxCompile Include="shaders\depthMap\PixelShader.hlsl" />
     <FxCompile Include="shaders\depthMap\VertexShader.hlsl" />
-    <FxCompile Include="shaders\ground\PixelShader.hlsl" />
-    <FxCompile Include="shaders\ground\VertexShader.hlsl" />
     <FxCompile Include="shaders\normalMap\PixelShader.hlsl" />
     <FxCompile Include="shaders\normalMap\VertexShader.hlsl" />
+    <FxCompile Include="shaders\shadowMap\PixelShader.hlsl" />
+    <FxCompile Include="shaders\shadowMap\VertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\braynzar.jpg">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\skymap.dds" />
     <Image Include="resources\grass.jpg">
       <Filter>Resource Files</Filter>
     </Image>
@@ -129,5 +146,8 @@
     <Image Include="resources\brick_bump.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\bunny.3dobj" />
   </ItemGroup>
 </Project>

@@ -22,7 +22,8 @@ SamplerState samplerState;
 
 float4 main(VS_OUTPUT input) : SV_TARGET {
 	input.normal = normalize(input.normal);
-	float4 color = texture2d.Sample(samplerState, input.texcoord);
+	float4 color = float4(0.5, 0.5, 0.5, 1);
+	//float4 color = texture2d.Sample(samplerState, input.texcoord);
 	float4 ambient = color * light.ambient;
 	float3 lightDir = normalize(light.position - input.worldPosition);
 	float4 diffuseColor = clamp(dot(lightDir, input.normal), 0, 1) * color * light.diffuse;

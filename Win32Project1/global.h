@@ -12,25 +12,39 @@ struct cbPerObject {
 	XMFLOAT4 eyePosition;
 };
 
+struct depthMapBuffer {
+	XMMATRIX lightView;
+	XMMATRIX lightProject;
+	XMFLOAT4 lightPosition;
+};
+
 struct Light {
 	XMFLOAT3 position;
 	float diffuse;
 	XMFLOAT4 ambient;
+
+	depthMapBuffer* caculateLightMatrices(int width, int height) {
+		depthMapBuffer *buffer = new depthMapBuffer();
+		buffer->lightPosition = XMFLOAT4(this->position.x, this->position.y, this->position.z, 1);
+		buffer->lightProject = XMMatrixTranspose(XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f));
+		XMVECTOR posVec = XMLoadFloat4(&(buffer->lightPosition));
+		XMVECTOR target = XMVectorSet(0, 0, 0, 0);
+		XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+
+		buffer->lightView = XMMatrixTranspose(XMMatrixLookAtLH(posVec, target, up));
+		return buffer;
+	}
+
 };
 
 struct cbPerFrame {
 	Light light;
 };
 
-struct matrixBuffer {
+struct MatrixBuffer {
 	XMMATRIX matrix;
 };
 
-struct depthMapBuffer {
-	XMMATRIX lightView;
-	XMMATRIX lightProject;
-	XMFLOAT4 lightPosition;
-};
 
 void static validateResult(HRESULT result, char* errorMessage) {
 	if (result) {

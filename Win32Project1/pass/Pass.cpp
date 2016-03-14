@@ -6,19 +6,13 @@ Pass::Pass(ID3D11Device *device, ID3D11DeviceContext *context, Camera *camera, R
 	pixelShader = NULL;
 }
 
+void Pass::update() {
+
+}
+
 void Pass::initViewport(int width, int height) {
 	this->width = width;
 	this->height = height;
-
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = width;
-	viewport.Height = height;
-	viewport.MaxDepth = 1.0f;
-	viewport.MinDepth = 0.0f;
-	context->RSSetViewports(1, &viewport);
 }
 
 void Pass::loadShaders(char* vsFilename, char* psFilename) {
@@ -29,20 +23,28 @@ void Pass::loadShaders(char* vsFilename, char* psFilename) {
 
 }
 
+void Pass::setShaders(Shader* vs, Shader* ps) {
+	vertexShader = vs;
+	pixelShader = ps;
+}
+
 void Pass::IASetModel() {
 	model->IASetModel(device, context, vertexShader->buffer);
 }
 
-void Pass::addConstantForPS(Constant* constant) {
+int Pass::addConstantForPS(Constant* constant) {
 	constantForPSList.push_back(constant);
+	return constantForPSList.size() - 1;
 }
 
-void Pass::addConstantForVS(Constant* constant) {
+int Pass::addConstantForVS(Constant* constant) {
 	constantForVSList.push_back(constant);
+	return constantForVSList.size() - 1;
 }
 
-void Pass::addTexture(Texture* texture) {
+int Pass::addTexture(Texture* texture) {
 	textureList.push_back(texture);
+	return textureList.size() - 1;
 }
 
 Pass::~Pass() {
@@ -52,15 +54,15 @@ Pass::~Pass() {
 	releaseIfNotNull(rasterizerState);
 	releaseIfNotNull(depthStencilState);
 	
-	for (std::list<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
+	for (std::vector<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
 		deleteIfNotNull(*i);
 	}
 
-	for (std::list<Constant*>::iterator i = constantForPSList.begin(); i != constantForPSList.end(); i++) {
+	for (std::vector<Constant*>::iterator i = constantForPSList.begin(); i != constantForPSList.end(); i++) {
 		deleteIfNotNull(*i);
 	}
 
-	for (std::list<Constant*>::iterator i = constantForVSList.begin(); i != constantForVSList.end(); i++) {
+	for (std::vector<Constant*>::iterator i = constantForVSList.begin(); i != constantForVSList.end(); i++) {
 		deleteIfNotNull(*i);
 	}
 }
@@ -70,15 +72,15 @@ void Pass::initDraw() {
 	vertexShader->setShader(device, context);
 	pixelShader->setShader(device, context);
 
-	for (std::list<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
+	for (std::vector<Texture*>::iterator i = textureList.begin(); i != textureList.end(); i++) {
 		(*i)->setTexture(device, context);
 	}
 
-	for (std::list<Constant*>::iterator i = constantForVSList.begin(); i != constantForVSList.end(); i++) {
+	for (std::vector<Constant*>::iterator i = constantForVSList.begin(); i != constantForVSList.end(); i++) {
 		(*i)->setConstantForVS(device, context);
 	}
 
-	for (std::list<Constant*>::iterator i = constantForPSList.begin(); i != constantForPSList.end(); i++) {
+	for (std::vector<Constant*>::iterator i = constantForPSList.begin(); i != constantForPSList.end(); i++) {
 		(*i)->setConstantForPS(device, context);
 	}
 
@@ -129,4 +131,20 @@ void Pass::setRenderTarget(RenderTarget *renderTarget) {
 
 void Pass::setUseDefaultWVP(BOOL useDefault) {
 	this->useDefaultWVP = useDefault;
+}
+
+void Pass::setConstantForPS(int index, Constant* constant) {
+	delete constantForPSList[index];
+	constantForPSList[index] = constant;
+}
+
+void Pass::setConstantForVS(int index, Constant* constant) {
+	if (index < constantForVSList.size()) {
+		delete constantForVSList[index];
+		constantForVSList[index] = constant;
+	}
+}
+
+RenderTarget* Pass::getRenderTarget() {
+	return renderTarget;
 }

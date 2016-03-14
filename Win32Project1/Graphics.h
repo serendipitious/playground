@@ -16,6 +16,9 @@
 #include "texture/SkyBox.h"
 #include "RenderTarget.h"
 #include "texture/RenderTargetTexture.h"
+#include "pass/SkyMapPass.h"
+#include "pass/ShadowMapPass.h"
+#include "pass/RenderDepthPass.h"
 
 class Graphics
 {
@@ -44,13 +47,15 @@ private:
 
 	// new version classes
 	Pass *pass;
-	Pass *ground;
-	Pass *environment;
 	Pass *debugPass;
-	Pass *depthPass;
+	Model *model;
+
+	SkyMapPass *skyMapPass;
+	RenderDepthPass *renderDepthPass;
+	ShadowMapPass *shadowMapPass;
 
 	RenderTarget *defaultRenderTarget;
-	RenderTarget *debugRenderTarget;
+	RenderTarget *depthRenderTarget;
 
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
@@ -67,9 +72,6 @@ private:
 	void initCamera();
 
 	void initPass();
-	void initDepthPass();
-	void initGround();
-	void initEnvironment();
 	void initDebugPass();
 };
 

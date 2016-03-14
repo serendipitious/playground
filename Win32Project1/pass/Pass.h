@@ -11,7 +11,7 @@
 #include "../Constant.h"
 #include "../texture/Texture.h"
 #include "../RenderTarget.h"
-#include <list>
+#include <vector>
 
 class Pass {
 public:
@@ -20,35 +20,37 @@ public:
 
 	Model *model;
 	virtual void draw();
+	virtual void update();
 
 	void setUseDefaultWVP(BOOL useDefault);
 	void IASetModel();
+
+	// deprecated
 	void loadShaders(char* vsFilename, char* psFilename);
+	void setShaders(Shader* vs, Shader *ps);
 	void initViewport(int width, int height);
 		
-	void addConstantForVS(Constant* constant);
-	void addConstantForPS(Constant* constant);
-	void addTexture(Texture* texture);
+	void setConstantForPS(int startSlot, Constant* constant);
+	void setConstantForVS(int startSlot, Constant* constant);
+
+	int addConstantForVS(Constant* constant);
+	int addConstantForPS(Constant* constant);
+	int addTexture(Texture* texture);
 
 	// states
 	void setRasterizerState(D3D11_RASTERIZER_DESC desc);
 	void setDepthStencilState(D3D11_DEPTH_STENCIL_DESC desc);
 
 	void setRenderTarget(RenderTarget *renderTarget);
+	RenderTarget* getRenderTarget();
 
 private:
-	ID3D11Device* device;
-	ID3D11DeviceContext* context;
-	Camera *camera;
 	Shader *vertexShader;
 	Shader *pixelShader;
-	RenderTarget *renderTarget;
-	int width;
-	int height;
 
-	std::list<Texture*> textureList = std::list<Texture*>();
-	std::list<Constant*> constantForVSList = std::list<Constant*>();
-	std::list<Constant*> constantForPSList = std::list<Constant*>();
+	std::vector<Texture*> textureList = std::vector<Texture*>();
+	std::vector<Constant*> constantForVSList = std::vector<Constant*>();
+	std::vector<Constant*> constantForPSList = std::vector<Constant*>();
 
 	ID3D11RasterizerState *rasterizerState = NULL;
 	ID3D11DepthStencilState *depthStencilState = NULL;
@@ -58,6 +60,13 @@ private:
 
 
 protected:
+	int width;
+	int height;
+	Camera *camera;
+	ID3D11Device* device;
+	ID3D11DeviceContext* context;
+	RenderTarget *renderTarget;
+
 	void initDraw();
 };
 
