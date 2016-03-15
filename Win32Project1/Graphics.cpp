@@ -7,7 +7,11 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 	light.ambient = XMFLOAT4(0.3, 0.3, 0.3, 0.0);
 	light.position = XMFLOAT3(3.0, 7.0, 10.0);
 
-	model = loadObjModel("resources\\bunny.3dobj", 0.01);
+	Model *bunny = loadObjModel("resources\\bunny.3dobj", 0.01);
+	Model *cube = createCube();
+	Model *allModel = concatModel(createCube(), bunny, 3, 0, 0);
+
+	model = bunny;
 
 	initCamera();
 
@@ -23,8 +27,7 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 	skyMapPass->init("resources\\skymap.dds", width, height);
 
 	renderDepthPass = new RenderDepthPass(device, context, camera, depthRenderTarget);
-	renderDepthPass->init(model, &light, width, height);
-	renderDepthPass->setWorldMatrix(transMatrix);
+	renderDepthPass->init(allModel, &light, width, height);
 
 	shadowMapPass = new ShadowMapPass(device, context, camera, defaultRenderTarget);
 	shadowMapPass->init(createPlane(), &light, "resources\\grass.jpg", depthRenderTarget->getTexture(), width, height);

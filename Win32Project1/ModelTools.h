@@ -294,3 +294,28 @@ static Model* loadObjModel(char *objFilename, float scale) {
 	}
 	return new Model(vectorToArray(vertices), vertices.size(), vectorToArray(indices), indices.size());
 }
+
+static Model* concatModel(Model *m1, Model *m2, float offsetX, float offsetY, float offsetZ) {
+	int dataSize = m1->dataSize + m2->dataSize;
+	Vertex *v = new Vertex[dataSize];
+	for (int i = 0; i < m1->dataSize; i++) {
+		v[i] = m1->data[i];
+	}
+
+	for (int i = 0; i < m2->dataSize; i++) {
+		v[i + m1->dataSize] = m2->data[i];
+		v[i + m1->dataSize].pos.x += offsetX;
+		v[i + m1->dataSize].pos.y += offsetY;
+		v[i + m1->dataSize].pos.z += offsetZ;
+	}
+
+	DWORD *indx = new DWORD[m1->indexSize + m2->indexSize];
+	for (int i = 0; i < m1->indexSize; i++) {
+		indx[i] = m1->indices[i];
+	}
+
+	for (int i = 0; i < m2->indexSize; i++) {
+		indx[m1->indexSize + i] = m2->indices[i] + m1->dataSize;
+	}
+	return new Model(v, m1->dataSize + m2->dataSize, indx, m1->indexSize + m2->indexSize);
+}
