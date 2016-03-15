@@ -20,6 +20,10 @@ void ShadowMapPass::init(Model *model, Light *light, char *textureFilename, ID3D
 
 	Constant *lightMatrices = calculateLightMatrices();
 	this->addConstantForVS(lightMatrices);
+
+	cbPerFrame *frame = new cbPerFrame;
+	frame->light = *light;
+	this->addConstantForPS(new Constant(frame, sizeof(cbPerFrame), 0));
 }
 
 

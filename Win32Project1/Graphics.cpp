@@ -4,7 +4,7 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 	initializeDirect3d11App(outputWindow, width, height);
 
 	light.diffuse = 0.6;
-	light.ambient = XMFLOAT4(0.8, 0.8, 0.8, 0.0);
+	light.ambient = XMFLOAT4(0.3, 0.3, 0.3, 0.0);
 	light.position = XMFLOAT3(3.0, 7.0, 10.0);
 
 	model = loadObjModel("resources\\bunny.3dobj", 0.01);
@@ -28,6 +28,9 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 
 	shadowMapPass = new ShadowMapPass(device, context, camera, defaultRenderTarget);
 	shadowMapPass->init(createPlane(), &light, "resources\\grass.jpg", depthRenderTarget->getTexture(), width, height);
+
+	normalMapPass = new NormalMapPass(device, context, camera, defaultRenderTarget);
+	normalMapPass->init(createCube(), "resources\\brick_bump.jpg", "resources\\brick.jpg", &light, width, height);
 }
 
 void Graphics::initPass() {
@@ -149,7 +152,8 @@ void Graphics::drawScene() {
 	
 	renderDepthPass->draw();
 	shadowMapPass->draw();
-	//ground->draw();
+
+	normalMapPass->draw();
 
 	debugPass->draw();
 

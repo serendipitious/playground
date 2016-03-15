@@ -60,6 +60,9 @@
     <ClCompile Include="pass\ShadowMapPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pass\NormalMapPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pass\ShadowMapPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pass\NormalMapPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

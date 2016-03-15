@@ -19,6 +19,7 @@
 #include "pass/SkyMapPass.h"
 #include "pass/ShadowMapPass.h"
 #include "pass/RenderDepthPass.h"
+#include "pass/NormalMapPass.h"
 
 class Graphics
 {
@@ -53,6 +54,7 @@ private:
 	SkyMapPass *skyMapPass;
 	RenderDepthPass *renderDepthPass;
 	ShadowMapPass *shadowMapPass;
+	NormalMapPass *normalMapPass;
 
 	RenderTarget *defaultRenderTarget;
 	RenderTarget *depthRenderTarget;

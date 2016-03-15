@@ -15,7 +15,6 @@ struct Light {
 
 cbuffer cbPerFrame {
 	Light light;
-	float4 eye;
 };
 
 Texture2D groundTexture : register(t0);

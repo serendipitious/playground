@@ -16,7 +16,6 @@ struct Light {
 
 cbuffer cbPerFrame {
 	Light light;
-	float4 eye;
 };
 
 Texture2D texture2d : register(t0);
@@ -38,7 +37,7 @@ float4 main(VS_OUTPUT input) : SV_TARGET {
 	float3 lightDir = normalize(light.position - input.worldPosition);
 	float4 diffuseColor = clamp(dot(lightDir, input.normal), 0, 1) * color * light.diffuse;
 	float3 reflectDir = -normalize(reflect(lightDir, input.normal));
-	float4 specular = pow(clamp(dot(reflectDir, normalize(input.eyeDir)), 0, 1), 5) * color;
+	float4 specular = pow(clamp(dot(reflectDir, normalize(input.eyeDir)), 0, 1), 10) * color;
 
 	return clamp(ambient + diffuseColor + specular, 0, 1);
 }
