@@ -29,10 +29,6 @@ void Pass::setShaders(Shader* vs, Shader* ps) {
 	pixelShader = ps;
 }
 
-void Pass::IASetModel() {
-	model->IASetModel(device, context, vertexShader->buffer);
-}
-
 int Pass::addConstantForPS(Constant* constant) {
 	constantForPSList.push_back(constant);
 	return constantForPSList.size() - 1;
@@ -85,8 +81,6 @@ void Pass::initDraw() {
 		(*i)->setConstantForPS(device, context);
 	}
 
-	IASetModel();
-
 	if (rasterizerState) {
 		context->RSSetState(rasterizerState);
 	}
@@ -123,8 +117,7 @@ void Pass::draw() {
 		wvp->setConstantForVS(device, context);
 	}
 
-	int indexSize = model->indexSize;
-	context->DrawIndexed(indexSize, 0, 0);
+	model->draw(device, context, vertexShader->buffer);
 }
 
 void Pass::setRasterizerState(D3D11_RASTERIZER_DESC desc) {

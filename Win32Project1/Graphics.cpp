@@ -34,6 +34,15 @@ Graphics::Graphics(HWND outputWindow, int width, int height) : width(width), hei
 
 	normalMapPass = new NormalMapPass(device, context, camera, defaultRenderTarget);
 	normalMapPass->init(createCube(), "resources\\brick_bump.jpg", "resources\\brick.jpg", &light, width, height);
+
+	// instances
+	InstanceType* instances = new InstanceType[2];
+	instances[0].offset = XMFLOAT3(1, 0, 0);
+	instances[1].offset = XMFLOAT3(5, 0, 0);
+
+	ModelInstance *twoCube = new ModelInstance(*createCube(), instances, 2);
+	instancesPass = new InstancesPass(device, context, camera, defaultRenderTarget);
+	instancesPass->init(twoCube, width, height);
 }
 
 void Graphics::initPass() {
@@ -156,9 +165,11 @@ void Graphics::drawScene() {
 	renderDepthPass->draw();
 	shadowMapPass->draw();
 
-	normalMapPass->draw();
+//	normalMapPass->draw();
 
 	debugPass->draw();
+
+	instancesPass->draw();
 
 	//Present the backbuffer to the screen
 	swapChain->Present(0, 0);

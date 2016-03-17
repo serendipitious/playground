@@ -1,5 +1,5 @@
 #pragma once
-#include "global.h"
+#include "../global.h"
 
 struct Vertex {
 	XMFLOAT3 pos;
@@ -25,19 +25,23 @@ struct Vertex {
 
 class Model {
 public:
+	Model();
 	Model(Vertex* data, int dataSize, DWORD* indices, int indexSize);
 	~Model();
-	void IASetModel(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffe);
+	virtual void draw(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer);
 
 	Vertex* data;
 	int dataSize;
 	DWORD* indices;
 	int indexSize;
 
+protected:
 	ID3D11InputLayout* layout;
-
-	// model buffers
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
+
+	void createBuffers(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer);
+	void setIABuffers(ID3D11DeviceContext *context);
+	void setLayout(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer);
 };
 

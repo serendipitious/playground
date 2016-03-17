@@ -4,7 +4,7 @@
 #include <d3dx11.h>
 #include <d3dx10.h>
 #include <xnamath.h>
-#include "../Model.h"
+#include "../model/Model.h"
 #include "../global.h"
 #include "../Camera.h"
 #include "../Shader.h"
@@ -23,7 +23,6 @@ public:
 	virtual void update();
 
 	void setUseDefaultWVP(BOOL useDefault);
-	void IASetModel();
 
 	// deprecated
 	void loadShaders(char* vsFilename, char* psFilename);

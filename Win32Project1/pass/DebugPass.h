@@ -2,7 +2,7 @@
 
 #include "Pass.h"
 #include "../global.h"
-#include "../Model.h"
+#include "../model/Model.h"
 #include "../RenderTarget.h"
 
 class DebugPass : public Pass {

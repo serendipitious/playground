@@ -21,9 +21,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,15 +60,21 @@
     <ClCompile Include="pass\NormalMapPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="model\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model\ModelInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pass\InstancesPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="global.h">
@@ -81,9 +84,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Constant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelTools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="texture\Texture.h">
@@ -119,6 +119,18 @@
     <ClInclude Include="pass\NormalMapPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="model\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model\ModelTools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model\ModelInstance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pass\InstancesPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32Project1.rc">
@@ -138,6 +150,8 @@
     <FxCompile Include="shaders\normalMap\VertexShader.hlsl" />
     <FxCompile Include="shaders\shadowMap\PixelShader.hlsl" />
     <FxCompile Include="shaders\shadowMap\VertexShader.hlsl" />
+    <FxCompile Include="shaders\instances\VertexShader.hlsl" />
+    <FxCompile Include="shaders\instances\PixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\braynzar.jpg">

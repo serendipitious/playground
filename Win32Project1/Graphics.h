@@ -5,14 +5,14 @@
 #include <d3dx10.h>
 #include <xnamath.h>
 #include "Camera.h"
-#include "Model.h"
+#include "model/Model.h"
 #include "pass/Pass.h"
 #include "pass/DebugPass.h"
 #include "global.h"
 #include "Shader.h"
 #include "Constant.h"
 #include "texture/Texture.h"
-#include "ModelTools.h"
+#include "model/ModelTools.h"
 #include "texture/SkyBox.h"
 #include "RenderTarget.h"
 #include "texture/RenderTargetTexture.h"
@@ -20,6 +20,8 @@
 #include "pass/ShadowMapPass.h"
 #include "pass/RenderDepthPass.h"
 #include "pass/NormalMapPass.h"
+#include "model/ModelInstance.h"
+#include "pass/InstancesPass.h"
 
 class Graphics
 {
@@ -55,6 +57,7 @@ private:
 	RenderDepthPass *renderDepthPass;
 	ShadowMapPass *shadowMapPass;
 	NormalMapPass *normalMapPass;
+	InstancesPass *instancesPass;
 
 	RenderTarget *defaultRenderTarget;
 	RenderTarget *depthRenderTarget;

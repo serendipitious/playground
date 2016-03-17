@@ -10,6 +10,9 @@ D3D11_INPUT_ELEMENT_DESC modelInputLayout[] = {
 UINT modelInputElementNum = ARRAYSIZE(modelInputLayout);
 
 
+Model::Model() {
+}
+
 Model::Model(Vertex* data, int dataSize, DWORD* indices, int indexSize)
 	: data(data), dataSize(dataSize), indices(indices), indexSize(indexSize) {
 	vertexBuffer = NULL;
@@ -25,7 +28,7 @@ Model::~Model() {
 	releaseIfNotNull(layout);
 }
 
-void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer) {
+void Model::createBuffers(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer) {
 	HRESULT result;
 	if (!vertexBuffer) {
 		// vertex buffer
@@ -44,10 +47,6 @@ void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context, ID3D1
 		validateResult(result, "create vertex buffer failed");
 	}
 
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-
 	if (!indexBuffer) {
 		// index buffer
 		D3D11_BUFFER_DESC indexBufferDesc;
@@ -64,12 +63,25 @@ void Model::IASetModel(ID3D11Device *device, ID3D11DeviceContext *context, ID3D1
 		result = device->CreateBuffer(&indexBufferDesc, &indexBufferData, &indexBuffer);
 		validateResult(result, "create index buffer failed");
 	}
+}
+
+void Model::draw(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer) {
+	createBuffers(device, context, vsBuffer);
+	setLayout(device, context, vsBuffer);
+	setIABuffers(context);
+	context->DrawIndexed(indexSize, 0, 0);
+}
+void Model::setIABuffers(ID3D11DeviceContext *context) {
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+}
 
-	// model input layout
+void Model::setLayout(ID3D11Device *device, ID3D11DeviceContext *context, ID3D10Blob *vsBuffer) {
 	if (!layout) {
-		result = device->CreateInputLayout(modelInputLayout, modelInputElementNum, vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), &layout);
+		HRESULT result = device->CreateInputLayout(modelInputLayout, modelInputElementNum, vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), &layout);
 		validateResult(result, "create input layout failed");
 	}
 

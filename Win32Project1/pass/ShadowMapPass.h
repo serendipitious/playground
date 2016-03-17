@@ -1,7 +1,7 @@
 #pragma once
 #include "../global.h"
 #include "Pass.h"
-#include "../Model.h"
+#include "../model/Model.h"
 #include "../texture/RenderTargetTexture.h"
 
 class ShadowMapPass : public Pass {

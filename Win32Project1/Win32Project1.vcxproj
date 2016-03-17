@@ -83,10 +83,12 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="pass\InstancesPass.cpp" />
+    <ClCompile Include="model\ModelInstance.cpp" />
     <ClCompile Include="pass\NormalMapPass.cpp" />
     <ClCompile Include="pass\DebugPass.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="model\Model.cpp" />
     <ClCompile Include="pass\Pass.cpp" />
     <ClCompile Include="Constant.cpp" />
     <ClCompile Include="pass\RenderDepthPass.cpp" />
@@ -101,11 +103,13 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="pass\InstancesPass.h" />
+    <ClInclude Include="model\ModelInstance.h" />
     <ClInclude Include="pass\NormalMapPass.h" />
     <ClInclude Include="pass\DebugPass.h" />
     <ClInclude Include="global.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelTools.h" />
+    <ClInclude Include="model\Model.h" />
+    <ClInclude Include="model\ModelTools.h" />
     <ClInclude Include="pass\Pass.h" />
     <ClInclude Include="Constant.h" />
     <ClInclude Include="pass\RenderDepthPass.h" />
@@ -122,6 +126,14 @@
     <ResourceCompile Include="Win32Project1.rc" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="shaders\instances\PixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\instances\VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\normalMap\PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

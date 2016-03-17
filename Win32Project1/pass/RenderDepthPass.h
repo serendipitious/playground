@@ -1,7 +1,7 @@
 #pragma once
 #include "../global.h"
 #include "Pass.h"
-#include "../Model.h"
+#include "../model/Model.h"
 #include "../Constant.h"
 
 class RenderDepthPass : public Pass {

@@ -3,7 +3,7 @@
 #include "../global.h"
 #include "Pass.h"
 #include "../texture/SkyBox.h"
-#include "../ModelTools.h"
+#include "../model/ModelTools.h"
 
 class SkyMapPass : public Pass {
 public:
